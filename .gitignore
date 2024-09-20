@@ -1,0 +1,4 @@
+.gitmodules
+src/posts/
+**/compiled/
+**/compost/
