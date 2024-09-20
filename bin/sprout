@@ -1,0 +1,43 @@
+#!/bin/sh
+
+drafts=$BBHOME/src/posts/drafts
+
+Usage() { echo "Usage: $0 [-m] [-p <string>]" 1>&2; exit 1; }
+
+while getopts "t:" o; do
+    case "${o}" in
+        t)
+            taxon=${OPTARG}
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
+for acorn in "$@"
+do
+	base="${acorn%.*}"
+	sapling="$base.poly.pm"
+
+	if [[ -f $drafts/**/$sapling ]]; then
+		echo "$sapling already exists"
+		break
+	fi
+
+	# copy the file and replace data
+	cp $BBHOME/src/seeds/tree_template.poly.pm $drafts/$sapling &&
+	sed -i "s/Template/$base/g" "$drafts/$sapling"
+
+	if [[ -z $taxon ]]; then
+		sed -i "s/template/$taxon/g" "$drafts/$sapling"
+	fi
+
+	if [[ -f $acorn ]]; then
+		cat $acorn >> $drafts/$sapling
+	fi
+
+	echo "$base planted"
+done
+

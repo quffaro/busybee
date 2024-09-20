@@ -1,0 +1,23 @@
+#!/bin/bash
+
+while getopts "s" arg; do
+	case "$arg" in
+		s)
+			tgt="saplings"
+			;;
+		*)
+			;;
+	esac
+done
+shift $((OPTIND-1))
+
+tgt="${tgt:-flowering}"
+
+case "$tgt" in
+	"saplings")
+		watchexec --exts pm "$BBHOME/bin/plant -s"
+		;;
+	*)
+		watchexec --exts pm "$BBHOME/bin/plant -m"
+		;;
+esac

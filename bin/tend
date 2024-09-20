@@ -1,0 +1,31 @@
+#!/bin/bash
+
+Usage() { echo "Usage:" 1>&2; exit 1; }
+
+while getopts "spm" arg; do
+	case "$arg" in
+		s)
+			tgt="saplings"
+			;;
+		p)
+			pollen=true
+			;;
+		m)
+			macros=true
+			;;
+		*)
+			;;
+	esac
+done
+shift $((OPTIND-1))
+
+grove=$HOME/Documents/personal/repos/grove
+
+if [ "$pollen" = true ] ; then
+	vim "$grove/flowers/pollen.rkt"
+elif [ "$macros" = true ] ; then
+	vim "$grove/trees/macros.tree"
+else
+	tgt="${tgt:-flowering}"
+	fd -e '.tree.pm' --search-path "$grove/flowers/$tgt" | fzf --bind "enter:become(vim {})"
+fi

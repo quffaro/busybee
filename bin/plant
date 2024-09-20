@@ -1,0 +1,47 @@
+#!/bin/bash
+
+usage() { echo "Usage: $0 [-m]" 1>&2; exit 1; }
+
+while getopts "ms" o; do
+    case "${o}" in
+        m)
+            m=1
+            ;;
+		s)
+			tgt="drafts"
+			;;
+        *)
+            usage
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
+tgt="${tgt:-public}"
+grepstr="^posts/**/${tgt}.*\.pm$"
+
+# get changed files
+# if [[ ! -z "$m" ]]; then
+# 	DIFF=$(git ls-files -m | grep $grepstr | sed 's/^posts\///')
+# else
+# 	DIFF=$(git ls-files | grep $grepstr | sed 's/^posts\///')
+# 	echo "Not modified: $DIFF"
+# fi
+
+# if [ -z "$DIFF" ]; then
+# 	echo "No pollen"
+# 	exit
+# fi
+
+# TODO CONFIG TOML SHOULD TELL US WHERE POSTS ARE
+echo "growing trees in flower directory"
+cd "$BBHOME/src"
+raco pollen render -t tree posts/public/*.poly.pm
+
+# move files to forester or other publishing target
+fd -e '.tree' --search-path posts/public -x mv {} "$BBHOME/forest/trees/test"
+
+# execute build step
+echo "building..."
+cd "$BBHOME/forest"
+forester build forest.toml
