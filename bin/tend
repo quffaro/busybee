@@ -19,13 +19,11 @@ while getopts "spm" arg; do
 done
 shift $((OPTIND-1))
 
-grove=$HOME/Documents/personal/repos/grove
-
 if [ "$pollen" = true ] ; then
-	vim "$grove/flowers/pollen.rkt"
+	vim "$BBHOME/src/pollen.rkt"
 elif [ "$macros" = true ] ; then
-	vim "$grove/trees/macros.tree"
+	vim "$BBHOME/trees/macros.tree"
 else
 	tgt="${tgt:-flowering}"
-	fd -e '.tree.pm' --search-path "$grove/flowers/$tgt" | fzf --bind "enter:become(vim {})"
+	fd -e '.tree.pm' --search-path "$BBHOME/src/posts/drafts" | fzf --bind "enter:become(vim {})"
 fi

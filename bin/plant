@@ -2,9 +2,11 @@
 
 usage() { echo "Usage: $0 [-m]" 1>&2; exit 1; }
 
-buildrepo=$(tomlq '.targets.forester.repo' config.toml | tr -d '"')
-buildtgt=$(tomlq '.targets.forester.tgt' config.toml | tr -d '"')
-buildcmd=$(tomlq '.targets.forester.builder' config.toml | tr -d '"')
+echo $BBHOME
+
+buildrepo=$(tomlq '.targets.forester.repo' $BBHOME/config.toml | tr -d '"')
+buildtgt=$(tomlq '.targets.forester.tgt' $BBHOME/config.toml | tr -d '"')
+buildcmd=$(tomlq '.targets.forester.builder' $BBHOME/config.toml | tr -d '"')
 
 while getopts "ms" o; do
     case "${o}" in
