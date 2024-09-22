@@ -1,1 +1,0 @@
-("8.14" ta6le ("6f8f348c98250ae8a60ab0e92d66d03fc2bb98de" . "e779c3ffc7273ec6c11f696cfac284e06d22442c") (collects #"pollen" #"setup.rkt") (collects #"racket" #"base.rkt") (collects #"racket" #"list.rkt") (collects #"racket" #"runtime-config.rkt") (collects #"racket" #"set.rkt") (collects #"rackunit" #"main.rkt") (collects #"txexpr" #"main.rkt"))
