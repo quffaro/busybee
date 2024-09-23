@@ -9,7 +9,9 @@
          pollen/tag         ; default-tag-function
          "lib/polytag.rkt"
          "lib/tags-html.rkt"
-         "lib/tags-tree.rkt")
+         "lib/tags-tree.rkt"
+		 "lib/tags-ltx.rkt"
+		 "lib/tags-pdf.rkt")
 
 (provide string-split
          pollen:version
@@ -27,13 +29,17 @@
   (define-runtime-path lib/polytag.rkt "lib/polytag.rkt")
   (define-runtime-path lib/tags-html.rkt "lib/tags-html.rkt")
   (define-runtime-path lib/tags-tree.rkt "lib/tags-tree.rkt")
+  (define-runtime-path lib/tags-ltx.rkt "lib/tags-ltx.rkt")
+  (define-runtime-path lib/tags-pdf.rkt "lib/tags-pdf.rkt")
   
   (define cache-watchlist
     (map resolve-module-path
          (list lib/common-helpers.rkt
                lib/polytag.rkt
                lib/tags-html.rkt
-               lib/tags-tree.rkt))))
+               lib/tags-tree.rkt
+			   lib/tags-ltx.rkt
+			   lib/tags-pdf.rkt))))
 
 (poly-branch-tag root)
 
