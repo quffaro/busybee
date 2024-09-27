@@ -7,3 +7,9 @@
 #:import ""]{}
 
 Hello, world!
+
+◊${\int}
+
+◊eq{\int_{\partial\Omega}\omega=\int_\Omega d\omega}
+
+◊include{test.poly.pm}

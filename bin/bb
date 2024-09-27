@@ -5,7 +5,7 @@ export BBHOME="$HOME/Documents/personal/repos/busybee"
 
 case "$1" in
   plant)
-	command plant
+	command plant "$2"
 	;;
   tend)
 	command tend
@@ -20,18 +20,3 @@ case "$1" in
 	echo "Usage: bb {plant|tend|irrigate|sprout}"
 	;;
 esac
-
-_bb_completions() {
-  local cur prev
-  cur="${COMP_WORDS[COMP_CWORD]}"
-  prev="${COMP_WORDS[COMP_CWORD-1]}"
-
-  # define list of subcommands
-  local commands="plant tend irrigate sprout"
-
-  if [[ ${COMP_CWORD} -eq 1 ]]; then
-	COMPREPLY=( $(compgen -W "$commands" -- "$cur") )
-  fi
-}
-
-complete -F _bb_completions bb

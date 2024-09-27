@@ -70,3 +70,14 @@
                (cons x rest-of-list)))
          empty
          lst))
+
+; Helper function: escape $, %, #, _ and & for LaTeX
+; when not already preceeded by a backslash
+(define (ltx-escape-str str)
+  (regexp-replace* #px"(?<!\\\\)([$#%&_])" str "\\\\\\1"))
+
+; Helper function: escape all strings in a list
+(define (esc elems)
+  (for/list ([e (in-list elems)])
+            (if (string? e) (ltx-escape-str e) e)))
+

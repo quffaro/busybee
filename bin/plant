@@ -2,19 +2,20 @@
 
 usage() { echo "Usage: $0 [-m]" 1>&2; exit 1; }
 
-echo $BBHOME
-
 buildrepo=$(tomlq '.targets.forester.repo' $BBHOME/config.toml | tr -d '"')
 buildtgt=$(tomlq '.targets.forester.tgt' $BBHOME/config.toml | tr -d '"')
 buildcmd=$(tomlq '.targets.forester.builder' $BBHOME/config.toml | tr -d '"')
 
-while getopts "ms" o; do
+while getopts "pbi" o; do
     case "${o}" in
-        m)
-            m=1
+        p)
+            tgt="public"
             ;;
-		s)
-			tgt="drafts"
+		b)
+			tgt="backburner"
+			;;
+		i)
+			tgt="in-progress"
 			;;
         *)
             usage
@@ -29,10 +30,10 @@ grepstr="^posts/**/${tgt}.*\.pm$"
 # TODO CONFIG TOML SHOULD TELL US WHERE POSTS ARE
 echo "growing trees in flower directory"
 cd "$BBHOME/src"
-raco pollen render -t tree posts/public/*.poly.pm
+raco pollen render -t tree posts/$tgt/*.poly.pm
 
 # move files to forester or other publishing target
-fd -e '.tree' --search-path posts/public -x mv {} "$buildrepo/$buildtgt/"
+fd -e '.tree' --search-path posts/$tgt -x mv {} "$buildrepo/$buildtgt/"
 
 # execute build step
 echo "building..."

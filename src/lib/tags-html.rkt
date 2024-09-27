@@ -60,6 +60,8 @@
 ; TODO no Latex support
 (define (html-$ attrs elems) `(span "\\(" ,@elems "\\)"))
 (define (html-eq attrs elems) `(span "\\(" ,@elems "\\"))
+(define (html-tex attrs pkgs elems) `(span "\\(" ,@elems "\\"))
+
 
 (define (html-? attrs elements) `(p ,@elements))
 
@@ -81,4 +83,59 @@
 			[else codeblock]))
 
 (define (html-include attrs text) `(p ,@text))
-(define (html-link url attrs elems) `(a [[href ,url]] ,@elems)) 
+(define (html-link url attrs elems) `(a [[href ,url]] ,@elems))
+
+#| otherjoel:
+  ◊table : allows the creation of basic tables from a simplified notation.
+  Modified from ◊quick-table in MB’s Typography for Lawyers source
+  (http://docs.racket-lang.org/pollen-tfl/_pollen_rkt_.html#%28elem._%28chunk._~3cquick-table~3e~3a1%29%29)
+
+  I’ve updated this tag so that A. it can produce both LaTeX and HTML tables,
+  B. it allows you to specify the text-alignment for columns in both those
+  formats, and C. it allows you to include tags inside table cells (not just strings)
+|#
+(define (html-td-tag . tx-els) `(td ,@tx-els))
+(define (html-th-tag . tx-els) `(th ,@tx-els))
+(define (html-tr-tag columns . tx-elems)
+  (define column-alignments #hash(("l" . "left") ("r" . "right") ("c" . "center")))
+
+  (cons 'tr (for/list ([cell (in-list tx-elems)]
+                       [c-a columns])
+                      (if (not (equal? c-a #\l))
+                          (attr-set cell 'style
+                                    (string-append "text-align: "
+                                                   (hash-ref column-alignments (string c-a))
+                                                   ";"))
+                          cell))))
+
+(define (html-table attrs elems)
+  (define c-aligns (attr-val 'columns attrs))
+  (cond [(not (or (equal? #f c-aligns) (column-alignments-string? c-aligns)))
+         (raise-argument-error 'table "#:columns must be a string containing 'l', 'r', or 'c'" (assq 'columns attrs))])
+
+
+  ;
+  ; Split the arguments into rows (at "\n"), and split any string values into
+  ; separate cells (at "|") and remove extra whitespace.
+  (define rows-parsed (for/list ([row (in-list (split-by elems "\n"))])
+                                (for/list ([cell (in-list row)])
+                                          (if (string? cell)
+                                              (map string-trim (filter-not whitespace? (string-split cell "|")))
+                                              cell))))
+
+  ; Clean things up (remove unnecessary levels of sublisting)
+  (define rows-of-cells (map clean-cells-in-row rows-parsed))
+
+  ; Create lists of individual cells using the tag functions defined previously.
+  ; These will be formatted according to the current target format.
+  ;   LaTeX: '((txt "Cell 1") " & " (txt "Cell 2") "\\\n")
+  ;   HTML:  '((td "Cell 1") (td "Cell 2"))
+  (define table-rows
+    (match-let ([(cons header-row other-rows) rows-of-cells])
+      (cons (map html-th-tag header-row)
+            (for/list ([row (in-list other-rows)])
+                      (map html-td-tag row)))))
+
+  (define col-args (if (not c-aligns) (make-string (length (first table-rows)) #\l) c-aligns))
+  (cons 'table (for/list ([table-row (in-list table-rows)])
+                         (apply html-tr-tag col-args table-row))))

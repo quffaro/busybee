@@ -1,0 +1,18 @@
+#!/bin/bash 
+
+# Directory to search for files 
+DIR=$1 
+OUTPUT_FILE="include_database.csv" 
+# Initialize the output file with a header 
+
+echo "Including File, Included File" > $OUTPUT_FILE 
+
+# Traverse through all files in the directory 
+find "$DIR" -type f | while read -r file; do 
+	# Search for the "include{...}" pattern in each file 
+	grep -oP '◊include{\K[^}]+' "$file" | while read -r included_file; do 
+	# Output the including file and included file to the CSV 
+	echo "$(basename "$file"), $included_file" >> $OUTPUT_FILE 
+	done 
+done 
+echo "Database generated in $OUTPUT_FILE"

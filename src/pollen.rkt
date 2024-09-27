@@ -66,6 +66,7 @@
 
 (poly-branch-tag $)
 (poly-branch-tag eq)
+(poly-branch-tag tex)
 
 (poly-branch-tag ?)
 
@@ -82,6 +83,11 @@
 
 (poly-branch-tag include)
 (poly-branch-tag link url)
+
+(poly-branch-tag td-tag)
+(poly-branch-tag th-tag)
+(poly-branch-tag tr-tag)
+(poly-branch-tag table (columns #f))
 
 (provide for/s)
 (define-syntax (for/s stx)

@@ -1,0 +1,9 @@
+[busybee]
+path = '~/Documents/personal/repos/busybee'
+
+[targets]
+
+[targets.forester]
+repo = '/home/you/Documents/personal/repos/forest'
+tgt = 'trees'
+builder = './build.sh'
