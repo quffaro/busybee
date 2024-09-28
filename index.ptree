@@ -5,6 +5,6 @@
         (filter (λ(str) (string-suffix? str extension))
                 (map path->string (directory-list folder)))))
 
-◊(define this-pagetree `(@ ,@(include-files "posts/in-progress/" "poly.pm")))
+◊(define this-pagetree `(@ ,@(include-files "posts/public" "poly.pm")))
 
 ◊this-pagetree

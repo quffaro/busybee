@@ -5,7 +5,11 @@
     \usepackage{tikz-cd}
     \usepackage[english]{babel}
     \usepackage[autostyle]{csquotes}
+    \usepackage{hyperref,booktabs}
     \usepackage{epigraph}
+    \newcommand{\Spec}{\textup{Spec}}
+    \newcommand{\FF}{\mathbb{F}}
+    \newcommand{\ZZ}{\mathbb{Z}}
     \begin{document}
     ◊(apply string-append (cdr doc))
     \end{document}})

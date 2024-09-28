@@ -39,7 +39,11 @@
 (define (html-taxon attrs elems) `(p ,@elems))
 (define (html-author attrs elems) `(p ,@elems))
 (define (html-import attrs elems) `(p ,@elems))
-(define (html-header attrs title taxon author import) `(p ,@title))
+(define (html-header attrs elems) 
+  (define header-val (format "\\title{~a}\n\\taxon{~a}\n\\author{~a}\n\\import{~a}\n\n" 
+										  (attr-val 'title attrs) (attr-val 'taxon attrs)
+										  (attr-val 'author attrs) (attr-val 'import attrs)))
+  `(header ,header-val))
 
 ;
 (define (html-p attrs elems) `(p ,@elems))
@@ -83,7 +87,8 @@
 			[else codeblock]))
 
 (define (html-include attrs text) `(p ,@text))
-(define (html-link url attrs elems) `(a [[href ,url]] ,@elems))
+(define (html-url url attrs elems) `(a [[href ,url]] ,@elems))
+(define (html-link attrs elems) `(p ,@elems))
 
 #| otherjoel:
   ◊table : allows the creation of basic tables from a simplified notation.

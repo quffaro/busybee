@@ -81,3 +81,21 @@
   (for/list ([e (in-list elems)])
             (if (string? e) (ltx-escape-str e) e)))
 
+; 
+(define (symb-match-substring symbols-list substr)
+  (filter (λ(symb)
+            (regexp-match? (regexp-quote substr)
+                           (symbol->string symb)))
+          symbols-list))
+
+#|
+  `txt-decode` is called by root when targeting LaTeX/PDF. It simply returns all
+  all elements contained inside ◊txt tag or a ◊txt-noescape tag. ◊txt is not
+  intended to be used in normal markup; its sole purpose is to allow other tag
+  functions to return LaTeX code as a valid tagged X-expression rather than as a
+  naked string.
+|#
+(define (txt-decode xs)
+    (if (member (get-tag xs) '(txt txt-noescape txt-comment))
+        (get-elements xs)
+        xs))

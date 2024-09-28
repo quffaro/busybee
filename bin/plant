@@ -29,7 +29,7 @@ grepstr="^posts/**/${tgt}.*\.pm$"
 
 # TODO CONFIG TOML SHOULD TELL US WHERE POSTS ARE
 echo "growing trees in flower directory"
-cd "$BBHOME/src"
+cd "$BBHOME/"
 raco pollen render -t tree posts/$tgt/*.poly.pm
 
 # move files to forester or other publishing target

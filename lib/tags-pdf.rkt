@@ -13,7 +13,8 @@
 		 file/md5
 		 pollen/decode
 		 pollen/core
-		 pollen/setup)
+		 pollen/setup
+         pollen/pagetree)
 
 (provide (all-defined-out))
 
@@ -76,19 +77,28 @@
 (define (pdf-? attrs elems) `(txt "{\\textbf{Question} " ,@elems "}"))
 
 (define (pdf-qt attrs elems) `(txt "\"" ,@elems "\""))
-(define (pdf-Qt attrs elems) `(txt "\\begin{quote}" ,@elems "\end{quote}"))
+(define (pdf-Qt attrs elems) `(txt "\\begin{quote}" ,@elems "\\end{quote}"))
 
-(define (pdf-ol attrs elems) `(txt "\\begin{itemize}" ,@elems "\end{itemize}"))
-(define (pdf-ul attrs elems) `(txt "\\begin{enumerate}" ,@elems "\end{enumerate}"))
+(define (pdf-ol attrs elems) `(txt "\\begin{itemize}" ,@elems "\\end{itemize}"))
+(define (pdf-ul attrs elems) `(txt "\\begin{enumerate}" ,@elems "\\end{enumerate}"))
 (define (pdf-li attrs elems) `(txt "\\item{" ,@elems "}"))
 
 (define (pdf-def attrs elems) `(txt "\\textbf{" ,@elems "}"))
 (define (pdf-code attrs elems) `(txt "\\texttt{" ,@elems "}"))
-(define (pdf-pre attrs elems) `(txt "\\begin{verbatim}" ,@elems "\end{verbatim}"))
+(define (pdf-pre attrs elems) `(txt "\\begin{verbatim}" ,@elems "\\end{verbatim}"))
 
-(define (pdf-include attrs file) `(txt ,@file))
-#| (define (pdf-include attrs text) `(txt-noescape "\\include{" ,@text "}")) |#
-(define (pdf-link url attrs elems) `(txt "[" ,@elems "](" ,@url ")"))
+#| (define (pdf-include attrs file) `(txt-noescape ,@file)) |#
+(define (pdf-include attrs file)
+  (define filepath (symb-match-substring (get-pagetree "../../pdf.ptree") (car file)))
+  (if (attr-val 'flat attrs)
+	`(txt "\\include{" 
+		  ,(path->string (path-replace-extension (symbol->string (car filepath)) #".tex")) "}")
+	`(@ ,@(cdr (get-doc (car filepath))))))
+  #| `(@ ,@(cdr (get-doc (string->symbol (car file)))))) |#
+
+
+(define (pdf-url url attrs elems) `(zlink ,url ,@elems))
+(define (pdf-link attrs elems) `(txt "[" ,@elems "]"))
 
 (define (pdf-td-tag . tx-els) `(txt ,@(esc tx-els)))
 (define (pdf-th-tag . tx-els) `(txt ,@(esc tx-els)))
@@ -104,14 +114,15 @@
 
   ; Split the arguments into rows (at "\n"), and split any string values into
   ; separate cells (at "|") and remove extra whitespace.
-  (define rows-parsed (for/list ([row (in-list (split-by elems "\n"))])
-                                (for/list ([cell (in-list row)])
+  (define rows-parsed (for/list ([row (in-list elems)])
+                                (for/list ([cell (in-list (filter-not whitespace? (string-split row "|")))])
+								  ; TODO will whitespace? fail on txexprs?
                                           (if (string? cell)
-                                              (map string-trim (filter-not whitespace? (string-split cell "|")))
-                                              cell))))
-
+                                              (string-trim cell)
+                                              cell)))) 
+ 
   ; Clean things up using the helper function above
-  (define rows-of-cells (map clean-cells-in-row rows-parsed))
+  (define rows-of-cells (filter-not null? (map clean-cells-in-row rows-parsed)))
 
   ; Create lists of individual cells using the tag functions defined previously.
   ; These will be formatted according to the current target format.

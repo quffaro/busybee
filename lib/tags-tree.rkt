@@ -26,7 +26,7 @@
 (define (tree-root attrs elements)
   (define first-pass (decode-elements elements
                                       #:txexpr-elements-proc tree-decode-paras
-									  #:exclude-tags '(header tex table tr th td)))
+									  #:exclude-tags '(header tex table tr th td include)))
   (define second-pass (decode-elements first-pass
                                        #:string-proc (compose1 smart-quotes smart-dashes)
 									   #:exclude-tags '(tex)))
@@ -74,8 +74,11 @@
 (define (tree-code attrs elems) `(txt "\\code{" ,@elems "}"))
 (define (tree-pre attrs elems) `(txt "\\pre{" ,@elems "}"))
 
-(define (tree-include attrs elems) `(txt "\\transclude{" ,@elems "}"))
-(define (tree-link url attrs elems) `(txt "[" ,@elems "](" ,@url ")"))
+(define (tree-include attrs elems) `(include "\\transclude{" ,@elems "}"))
+
+(define (tree-url url attrs tx-elem) 
+  `(txt "[" ,@tx-elem "]" ,(if (non-empty-string? url) (string-append "(" url ")") "")))
+(define (tree-link attrs tx-elem) `(txt "[[" ,@tx-elem "]]"))
 
 #| (define (tree-table . elems) (apply string-append `("\\table{" ,@elems "}"))) |#
 (define (tree-td-tag . tx-els) `(txt "\\td{" ,@(esc tx-els) "}"))

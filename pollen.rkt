@@ -47,7 +47,7 @@
 (poly-branch-tag taxon)
 (poly-branch-tag author)
 (poly-branch-tag import)
-(poly-branch-tag header (title "") (taxon "template") (author "Matt Cuffaro") (import ""))
+(poly-branch-tag header (title "") (taxon "template") (author "yourself!") (import ""))
 
 ; simple tag with no required or default attributes
 (poly-branch-tag p)
@@ -82,7 +82,9 @@
 (poly-branch-tag pre)
 
 (poly-branch-tag include)
-(poly-branch-tag link url)
+(poly-branch-tag url url)
+(poly-branch-tag link)
+; TODO [[linking]]
 
 (poly-branch-tag td-tag)
 (poly-branch-tag th-tag)

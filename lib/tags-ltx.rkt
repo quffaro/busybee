@@ -13,15 +13,27 @@
 		 file/md5
 		 pollen/decode
 		 pollen/core
-		 pollen/setup)
+		 pollen/setup
+		 pollen/pagetree)
 
 (provide (all-defined-out))
 
 (define (ellipses x)
   (string-replace x "..." "…"))
 
+(define (ltx-link-decoder inline-txpr)
+  (if (eq? 'zlink (get-tag inline-txpr))
+      (let ([elems (get-elements inline-txpr)])
+           `(txt "\\href{" ,(ltx-escape-str (first elems)) "}"
+                 "{" ,@(esc (rest elems)) "}"))
+      inline-txpr))
+
 (define (ltx-root attrs elements)
-  (txexpr 'body null elements))
+  (define first-pass (decode-elements (get-elements (wrap-comment-section (txexpr 'root null (esc elements)) esc))
+                                      #:inline-txexpr-proc (compose1 txt-decode ltx-link-decoder)
+                                      #:string-proc (compose1 smart-quotes smart-dashes)
+                                      #:exclude-tags '(script style figure txt-noescape)))
+  (txexpr 'body null (decode-elements first-pass #:inline-txexpr-proc txt-decode)))
 
 (define (ltx-title attrs elems) `(txt "Title: " ,@elems "}"))
 (define (ltx-taxon attrs elems) `(txt "Taxon: " ,@elems "}"))
@@ -40,32 +52,41 @@
 (define (ltx-caps attrs elems) `(txt "\\textit{" ,@elems "}"))
 (define (ltx-strike attrs elems) `(txt "\\textbf{" ,@elems "}"))
 
-(define (ltx-thm attrs elems) `(txt "\\begin{theorem}" ,@elems "\end{theorem}"))
-(define (ltx-proof attrs elems) `(txt "\\begin{proof}" ,@elems "\end{proof}"))
+(define (ltx-thm attrs elems) `(txt "\\begin{theorem}" ,@elems "\\end{theorem}"))
+(define (ltx-proof attrs elems) `(txt "\\begin{proof}" ,@elems "\\end{proof}"))
 
 #| (define (ltx-h1 attrs elems #:id [id 0]) `(txt "\\p{" ,@elems "}")) |#
 #| (define (ltx-h2 attrs elems #:id [id 0]) `(txt "\\p{" ,@elems "}")) |#
 #| (define (ltx-h3 attrs elems #:id [id 0]) `(txt "\\p{" ,@elems "}")) |#
 
 (define (ltx-$ attrs elems) `(tex "$" ,@elems "}"))
-(define (ltx-eq attrs elems) `(tex "\\begin{equation}" ,@elems "\end{equation}"))
-(define (ltx-tex attrs pkgs elems) `(tex "\\begin{equation}" ,@elems "\end{equation}"))
+(define (ltx-eq attrs elems) `(tex "\\begin{equation}" ,@elems "\\end{equation}"))
+(define (ltx-tex attrs pkgs elems) `(tex "\\begin{equation}" ,@elems "\\end{equation}"))
 
 (define (ltx-? attrs elems) `(txt "{\\textbf{Question} " ,@elems "}"))
 
 (define (ltx-qt attrs elems) `(txt "\"" ,@elems "\""))
-(define (ltx-Qt attrs elems) `(txt "\\begin{quote}" ,@elems "\end{quote}"))
+(define (ltx-Qt attrs elems) `(txt "\\begin{quote}" ,@elems "\\end{quote}"))
 
-(define (ltx-ol attrs elems) `(txt "\\begin{itemize}" ,@elems "\end{itemize}"))
-(define (ltx-ul attrs elems) `(txt "\\begin{enumerate}" ,@elems "\end{enumerate}"))
+(define (ltx-ol attrs elems) `(txt "\\begin{itemize}" ,@elems "\\end{itemize}"))
+(define (ltx-ul attrs elems) `(txt "\\begin{enumerate}" ,@elems "\\end{enumerate}"))
 (define (ltx-li attrs elems) `(txt "\\item{" ,@elems "}"))
 
 (define (ltx-def attrs elems) `(txt "\\textbf{" ,@elems "}"))
 (define (ltx-code attrs elems) `(txt "\\texttt{" ,@elems "}"))
-(define (ltx-pre attrs elems) `(txt "\\begin{verbatim}" ,@elems "\end{verbatim}"))
+(define (ltx-pre attrs elems) `(txt "\\begin{verbatim}" ,@elems "\\end{verbatim}"))
 
-(define (ltx-include attrs elems) `(txt "\\include{" ,@elems "}"))
-(define (ltx-link url attrs elems) `(txt "[" ,@elems "](" ,@url ")"))
+#| (define (ltx-include attrs elems) `(txt "\\include{" ,@elems "}")) |#
+(define (ltx-include attrs file)
+  (define filepath (symb-match-substring (get-pagetree "../../pdf.ptree") (car file)))
+  (if (attr-val 'flat attrs)
+	`(txt "\\include{" 
+		  ,(path->string (path-replace-extension (symbol->string (car filepath)) #".tex")) "}")
+	`(@ ,@(cdr (get-doc (car filepath))))))
+
+
+(define (ltx-url url attrs elems) `(zlink ,url ,@elems))
+(define (ltx-link attrs elems) `(txt "[" ,@elems "]"))
 
 (define (ltx-td-tag . tx-els) `(txt ,@(esc tx-els)))
 (define (ltx-th-tag . tx-els) `(txt ,@(esc tx-els)))
@@ -81,14 +102,15 @@
 
   ; Split the arguments into rows (at "\n"), and split any string values into
   ; separate cells (at "|") and remove extra whitespace.
-  (define rows-parsed (for/list ([row (in-list (split-by elems "\n"))])
-                                (for/list ([cell (in-list row)])
+  (define rows-parsed (for/list ([row (in-list elems)])
+                                (for/list ([cell (in-list (filter-not whitespace? (string-split row "|")))])
+								  ; TODO will whitespace? fail on txexprs?
                                           (if (string? cell)
-                                              (map string-trim (filter-not whitespace? (string-split cell "|")))
-                                              cell))))
+                                              (string-trim cell)
+                                              cell)))) 
 
   ; Clean things up using the helper function above
-  (define rows-of-cells (map clean-cells-in-row rows-parsed))
+  (define rows-of-cells (filter-not null? (map clean-cells-in-row rows-parsed)))
 
   ; Create lists of individual cells using the tag functions defined previously.
   ; These will be formatted according to the current target format.
