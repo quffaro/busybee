@@ -53,8 +53,13 @@
 (define (pdf-taxon attrs elems) `(txt "Taxon: " ,@elems "}"))
 (define (pdf-author attrs elems) `(txt "Author: " ,@elems "}"))
 (define (pdf-import attrs elems) `(txt "Import: " ,@elems "}"))
-(define (pdf-header attrs elems)
-  `(txt, "Title!"))
+
+(define (pdf-header attrs elems) 
+	(define title (attr-val 'title attrs))
+	(define taxon (attr-val 'taxon attrs))
+	(if (current-inclusion-context)
+		`(txt "\\subsection*{" ,title "}\n\\textit{" ,taxon "}\n") 
+		`(txt "\\section*{" ,title "}\n")))
 
 (define (pdf-p attrs elems) `(txt "" ,@elems "}\n\n"))
 (define (pdf-i attrs text) `(txt "{\\itshape " ,@(esc text) "}"))
@@ -76,7 +81,7 @@
 
 (define (pdf-? attrs elems) `(txt "{\\textbf{Question} " ,@elems "}"))
 
-(define (pdf-qt attrs elems) `(txt "\"" ,@elems "\""))
+(define (pdf-qt attrs elems) `(txt "``" ,@elems "\""))
 (define (pdf-Qt attrs elems) `(txt "\\begin{quote}" ,@elems "\\end{quote}"))
 
 (define (pdf-ol attrs elems) `(txt "\\begin{itemize}" ,@elems "\\end{itemize}"))
@@ -84,18 +89,34 @@
 (define (pdf-li attrs elems) `(txt "\\item{" ,@elems "}"))
 
 (define (pdf-def attrs elems) `(txt "\\textbf{" ,@elems "}"))
-(define (pdf-code attrs elems) `(txt "\\texttt{" ,@elems "}"))
-(define (pdf-pre attrs elems) `(txt "\\begin{verbatim}" ,@elems "\\end{verbatim}"))
+(define (pdf-code attrs text)
+  `(txt "\\texttt{"
+        ,@(esc (list (string-replace (apply string-append text) "\\" "\\textbackslash ")))
+        "}"))
+#| (define (pdf-code attrs elems) `(txt "\\texttt{" ,@elems "}")) |#
+(define (pdf-pre attrs text)
+  (define filename (attr-val 'filename attrs))
+  (define caption
+          ; Note that using title= instead of caption= prevents listings from showing up in
+          ; the "List of Listings" in the table of contents
+          (if (string>? filename "") (string-append "[title={" filename "}]") ""))
+  `(txt-noescape "\\begin{lstlisting}" ,caption "\n" ,@text "\n\\end{lstlisting}"))
+#| (define (pdf-pre attrs elems) `(txt "\\begin{verbatim}" ,@elems "\\end{verbatim}")) |#
+
+(define current-inclusion-context (make-parameter #f))
 
 #| (define (pdf-include attrs file) `(txt-noescape ,@file)) |#
 (define (pdf-include attrs file)
-  (define filepath (symb-match-substring (get-pagetree "../../pdf.ptree") (car file)))
+  (define filepath (symb-match-substring 
+	(get-pagetree (build-path (current-directory-for-user) "pdf.ptree")) (car file)))
   (if (attr-val 'flat attrs)
-	`(txt "\\include{" 
-		  ,(path->string (path-replace-extension (symbol->string (car filepath)) #".tex")) "}")
-	`(@ ,@(cdr (get-doc (car filepath))))))
-  #| `(@ ,@(cdr (get-doc (string->symbol (car file)))))) |#
-
+	`(txt "\\include{" ,(path->string 
+						  (path-replace-extension 
+							(symbol->string (car filepath)) #".tex")) "}")
+	`(@ ,@(cdr (parameterize ([current-inclusion-context #t])
+				 (get-doc (car filepath)))
+			   ))))
+; TODO need better error handling. "car" fails if there's no file. but it's better to raise an error.
 
 (define (pdf-url url attrs elems) `(zlink ,url ,@elems))
 (define (pdf-link attrs elems) `(txt "[" ,@elems "]"))
