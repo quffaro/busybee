@@ -1,6 +1,6 @@
 #!/bin/sh
 
-drafts=$BBHOME/src/posts/drafts
+drafts=$BBHOME/src/posts/backburner
 
 Usage() { echo "Usage: $0 [-m] [-p <string>]" 1>&2; exit 1; }
 

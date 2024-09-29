@@ -1,0 +1,16 @@
+#lang racket
+(require toml)
+
+(define resulting-config
+  '#hasheq((busybee . #hasheq((path . "hello")))
+		   (targets . #hasheq((forester . (#hasheq((repo . "A!") 
+												   (tgt . "T!")))))
+					)))
+
+(define sample-expr
+  '#hasheq((table . #hasheq((key . 5)
+                            (array . (#hasheq((a . 1) (b . 2))
+                                      #hasheq((a . 2) (b . 4))))))
+           (|another-table| . #hasheq((key . 10)))))
+
+(display (tomlexpr->string resulting-config))

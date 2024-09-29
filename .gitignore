@@ -1,4 +1,4 @@
 .gitmodules
-src/posts/
+posts/
 **/compiled/
 **/compost/
