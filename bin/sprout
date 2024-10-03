@@ -1,6 +1,6 @@
 #!/bin/sh
 
-drafts=$BBHOME/src/posts/backburner
+drafts=$BBHOME/posts/backburner
 
 Usage() { echo "Usage: $0 [-m] [-p <string>]" 1>&2; exit 1; }
 
@@ -27,7 +27,7 @@ do
 	fi
 
 	# copy the file and replace data
-	cp $BBHOME/src/seeds/tree_template.poly.pm $drafts/$sapling &&
+	cp $BBHOME/seeds/tree_template.poly.pm $drafts/$sapling &&
 	sed -i "s/Template/$base/g" "$drafts/$sapling"
 
 	if [[ -z $taxon ]]; then
