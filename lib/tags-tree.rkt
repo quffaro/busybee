@@ -53,9 +53,9 @@
 (define (tree-thm attrs elems) `(txt "\\p{" "\\strong{Theorem} " ,@elems "}"))
 (define (tree-proof attrs elems) `(txt "\\p{" "\\emph{Proof:} " ,@elems "}"))
 
-#| (define (tree-h1 attrs elems #:id [id 0]) (apply string-append `("\\p{" ,@elems "}"))) |#
-#| (define (tree-h2 attrs elems #:id [id 0]) (apply string-append `("\\p{" ,@elems "}"))) |#
-#| (define (tree-h3 attrs elems #:id [id 0]) (apply string-append `("\\p{" ,@elems "}"))) |#
+(define (tree-h1 attrs elems #:id [id 0]) (apply string-append `("\\p{" ,@elems "}")))
+(define (tree-h2 attrs elems #:id [id 0]) (apply string-append `("\\p{" ,@elems "}")))
+(define (tree-h3 attrs elems #:id [id 0]) (apply string-append `("\\p{" ,@elems "}")))
 
 (define (tree-$ attrs elems) `(tex ,(apply string-append `("#{" ,@elems "}"))))
 (define (tree-eq attrs elems) `(tex ,(format "##{~a}" elems)))
@@ -65,6 +65,7 @@
 
 (define (tree-qt attrs elems) `(txt "\"" ,@elems "\""))
 (define (tree-Qt attrs elems) `(txt "\\blockquote{" ,@elems "}"))
+(define (tree-newthought attrs elems) `(txt "\\p{" ,@elems "}\n\n"))
 
 (define (tree-ol attrs elems) `(txt "\\ol{" ,@elems "}"))
 (define (tree-ul attrs elems) `(txt "\\ul{" ,@elems "}"))
@@ -76,9 +77,9 @@
 
 (define (tree-include attrs elems) `(include "\\transclude{" ,@elems "}"))
 
-(define (tree-url url attrs tx-elem) 
+(define (tree-link url attrs tx-elem) 
   `(txt "[" ,@tx-elem "]" ,(if (non-empty-string? url) (string-append "(" url ")") "")))
-(define (tree-link attrs tx-elem) `(txt "[[" ,@tx-elem "]]"))
+(define (tree-lank attrs tx-elem) `(txt "[[" ,@tx-elem "]]"))
 
 #| (define (tree-table . elems) (apply string-append `("\\table{" ,@elems "}"))) |#
 (define (tree-td-tag . tx-els) `(txt "\\td{" ,@(esc tx-els) "}"))

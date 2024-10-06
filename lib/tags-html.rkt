@@ -57,9 +57,9 @@
 (define (html-thm attrs elems) `(p ,@elems))
 (define (html-proof attrs elems) `(p ,@elems))
 
-#| (define (html-h1 attrs title) `(h1 ,@title)) |#
-#| (define (html-h2 attrs title) `(h2 ,@title)) |#
-#| (define (html-h3 attrs title) `(h3 ,@title)) |#
+(define (html-h1 attrs title) `(h1 ,@title))
+(define (html-h2 attrs title) `(h2 ,@title))
+(define (html-h3 attrs title) `(h3 ,@title))
 
 ; TODO no Latex support
 (define (html-$ attrs elems) `(span "\\(" ,@elems "\\)"))
@@ -72,6 +72,8 @@
 ; TODO
 (define (html-qt attrs elements) `(p ,@elements))
 (define (html-Qt attrs elements) `(blockquote ,@elements))
+(define (html-newthought attrs elems)
+  `(span [[class "newthought"]] ,@elems))
 
 (define (html-ol attrs elements) `(ol ,@elements))
 (define (html-ul attrs elements) `(ul ,@elements))
@@ -87,8 +89,28 @@
 			[else codeblock]))
 
 (define (html-include attrs text) `(p ,@text))
-(define (html-url url attrs elems) `(a [[href ,url]] ,@elems))
-(define (html-link attrs elems) `(p ,@elems))
+(define (html-link url attrs elems) `(a [[href ,url]] ,@elems))
+(define (html-lank attrs elems) `(p ,@elems))
+
+#|
+detect-newthoughts: called by root above when targeting HTML.
+The ◊newthought tag (defined further below) makes use of the \newthought
+command in Tufte-LaTeX and the .newthought CSS style in Tufte-CSS to start a
+new section with some words in small caps. In LaTeX, this command additionally
+adds some vertical spacing in front of the enclosing paragraph. There is no way
+to do this in HTML/CSS without adding in some Javascript: i.e., there is no
+CSS selector for “p tags that contain a span of class ‘newthought’”. So we can
+handle it at the Pollen processing level.
+|#
+(define (detect-newthoughts block-xpr)
+  (define is-newthought? (λ(x) (and (txexpr? x)
+                                    (eq? 'span (get-tag x))
+                                    (attrs-have-key? x 'class)
+                                    (string=? "newthought" (attr-ref x 'class)))))
+  (if (and(eq? (get-tag block-xpr) 'p)             ; Is it a <p> tag?
+          (findf-txexpr block-xpr is-newthought?)) ; Does it contain a <span class="newthought">?
+      (attr-set block-xpr 'class "pause-before")   ; Add the ‘pause-before’ class
+      block-xpr))   
 
 #| otherjoel:
   ◊table : allows the creation of basic tables from a simplified notation.

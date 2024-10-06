@@ -37,6 +37,12 @@
                  "{" ,@(esc (rest elems)) "}"))
       inline-txpr))
 
+; Helper function: escape $, %, #, _ and & for LaTeX
+; when not already preceeded by a backslash
+(define (ltx-escape-str str)
+  (identity str))
+  #| (regexp-replace* #px"(?<!\\\\)([$#%&_])" str "\\\\\\1")) |#
+
 ; Helper function: escape all strings in a list
 (define (esc elems)
   (for/list ([e (in-list elems)])
@@ -55,11 +61,15 @@
 (define (pdf-import attrs elems) `(txt "Import: " ,@elems "}"))
 
 (define (pdf-header attrs elems) 
-	(define title (attr-val 'title attrs))
-	(define taxon (attr-val 'taxon attrs))
+	(define the-title (attr-val 'title attrs))
+	(define the-taxon (attr-val 'taxon attrs))
+	(define the-author (attr-val 'author attrs))
 	(if (current-inclusion-context)
-		`(txt "\\subsection*{" ,title "}\n\\textit{" ,taxon "}\n") 
-		`(txt "\\section*{" ,title "}\n")))
+		`(txt "\\subsection*{" ,the-title "}\n\\textit{" ,the-taxon "}\n") 
+		`(txt "\\begingroup
+			  \\centering
+			  {\\LARGE\\bf " ,the-title " }\\\\[1em]
+			  \\endgroup")))
 
 (define (pdf-p attrs elems) `(txt "" ,@elems "}\n\n"))
 (define (pdf-i attrs text) `(txt "{\\itshape " ,@(esc text) "}"))
@@ -71,9 +81,9 @@
 (define (pdf-thm attrs elems) `(txt "\\begin{theorem}" ,@elems "\end{theorem}"))
 (define (pdf-proof attrs elems) `(txt "\\begin{proof}" ,@elems "\end{proof}"))
 
-#| (define (pdf-h1 attrs elems #:id [id 0]) `(txt "\\p{" ,@elems "}")) |#
-#| (define (pdf-h2 attrs elems #:id [id 0]) `(txt "\\p{" ,@elems "}")) |#
-#| (define (pdf-h3 attrs elems #:id [id 0]) `(txt "\\p{" ,@elems "}")) |#
+(define (pdf-h1 attrs elems #:id [id 0]) `(txt "\\section*{" ,@elems "}"))
+(define (pdf-h2 attrs elems #:id [id 0]) `(txt "\\subsection*{" ,@elems "}"))
+(define (pdf-h3 attrs elems #:id [id 0]) `(txt "\\subsection*{" ,@elems "}"))
 
 (define (pdf-$ attrs elems) `(txt-noescape "$" ,@elems "$")) 
 (define (pdf-eq attrs elems) `(txt-noescape "\\begin{equation}" ,@elems "\\end{equation}")) 
@@ -83,6 +93,7 @@
 
 (define (pdf-qt attrs elems) `(txt "``" ,@elems "\""))
 (define (pdf-Qt attrs elems) `(txt "\\begin{quote}" ,@elems "\\end{quote}"))
+(define (pdf-newthought attrs elems) `(txt "\\newthought{" ,@(esc elems) "}"))
 
 (define (pdf-ol attrs elems) `(txt "\\begin{itemize}" ,@elems "\\end{itemize}"))
 (define (pdf-ul attrs elems) `(txt "\\begin{enumerate}" ,@elems "\\end{enumerate}"))
@@ -109,6 +120,7 @@
 (define (pdf-include attrs file)
   (define filepath (symb-match-substring 
 	(get-pagetree (build-path (current-directory-for-user) "pdf.ptree")) (car file)))
+  (displayln filepath)
   (if (attr-val 'flat attrs)
 	`(txt "\\include{" ,(path->string 
 						  (path-replace-extension 
@@ -118,8 +130,8 @@
 			   ))))
 ; TODO need better error handling. "car" fails if there's no file. but it's better to raise an error.
 
-(define (pdf-url url attrs elems) `(zlink ,url ,@elems))
-(define (pdf-link attrs elems) `(txt "[" ,@elems "]"))
+(define (pdf-link url attrs elems) `(zlink ,url ,@elems))
+(define (pdf-lank attrs elems) `(txt "[" ,@elems "]"))
 
 (define (pdf-td-tag . tx-els) `(txt ,@(esc tx-els)))
 (define (pdf-th-tag . tx-els) `(txt ,@(esc tx-els)))

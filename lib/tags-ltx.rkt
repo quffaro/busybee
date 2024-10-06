@@ -55,9 +55,9 @@
 (define (ltx-thm attrs elems) `(txt "\\begin{theorem}" ,@elems "\\end{theorem}"))
 (define (ltx-proof attrs elems) `(txt "\\begin{proof}" ,@elems "\\end{proof}"))
 
-#| (define (ltx-h1 attrs elems #:id [id 0]) `(txt "\\p{" ,@elems "}")) |#
-#| (define (ltx-h2 attrs elems #:id [id 0]) `(txt "\\p{" ,@elems "}")) |#
-#| (define (ltx-h3 attrs elems #:id [id 0]) `(txt "\\p{" ,@elems "}")) |#
+(define (ltx-h1 attrs elems #:id [id 0]) `(txt "\\section*{" ,@elems "}"))
+(define (ltx-h2 attrs elems #:id [id 0]) `(txt "\\subsection*{" ,@elems "}"))
+(define (ltx-h3 attrs elems #:id [id 0]) `(txt "\\subsubsection*{" ,@elems "}"))
 
 (define (ltx-$ attrs elems) `(tex "$" ,@elems "}"))
 (define (ltx-eq attrs elems) `(tex "\\begin{equation}" ,@elems "\\end{equation}"))
@@ -67,6 +67,7 @@
 
 (define (ltx-qt attrs elems) `(txt "\"" ,@elems "\""))
 (define (ltx-Qt attrs elems) `(txt "\\begin{quote}" ,@elems "\\end{quote}"))
+(define (ltx-newthought attrs elems) `(txt "\\newthought{" ,@(esc elems) "}"))
 
 (define (ltx-ol attrs elems) `(txt "\\begin{itemize}" ,@elems "\\end{itemize}"))
 (define (ltx-ul attrs elems) `(txt "\\begin{enumerate}" ,@elems "\\end{enumerate}"))
@@ -85,8 +86,8 @@
 	`(@ ,@(cdr (get-doc (car filepath))))))
 
 
-(define (ltx-url url attrs elems) `(zlink ,url ,@elems))
-(define (ltx-link attrs elems) `(txt "[" ,@elems "]"))
+(define (ltx-link url attrs elems) `(zlink ,url ,@elems))
+(define (ltx-lank attrs elems) `(txt "[" ,@elems "]"))
 
 (define (ltx-td-tag . tx-els) `(txt ,@(esc tx-els)))
 (define (ltx-th-tag . tx-els) `(txt ,@(esc tx-els)))
