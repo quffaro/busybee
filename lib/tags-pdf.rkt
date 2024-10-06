@@ -71,6 +71,7 @@
 			  {\\LARGE\\bf " ,the-title " }\\\\[1em]
 			  \\endgroup")))
 
+
 (define (pdf-p attrs elems) `(txt "" ,@elems "}\n\n"))
 (define (pdf-i attrs text) `(txt "{\\itshape " ,@(esc text) "}"))
 (define (pdf-em attrs elems) `(txt "\\emph{" ,@(esc elems) "}"))
@@ -100,6 +101,7 @@
 (define (pdf-li attrs elems) `(txt "\\item{" ,@elems "}"))
 
 (define (pdf-def attrs elems) `(txt "\\textbf{" ,@elems "}"))
+
 (define (pdf-code attrs text)
   `(txt "\\texttt{"
         ,@(esc (list (string-replace (apply string-append text) "\\" "\\textbackslash ")))

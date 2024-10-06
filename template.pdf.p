@@ -2,7 +2,6 @@
 ◊(define latex-source ◊string-append{
     \documentclass[a4paper,12pt]{article}
     \usepackage{ragged2e}
-
     \usepackage{amsmath,amsfonts}
     \usepackage{tikz-cd}
     \usepackage[english]{babel}
