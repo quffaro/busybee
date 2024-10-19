@@ -74,6 +74,7 @@
 (define (html-Qt attrs elements) `(blockquote ,@elements))
 (define (html-newthought attrs elems)
   `(span [[class "newthought"]] ,@elems))
+(define (html-epigraph attrs elems) `(p ,@elems))
 
 (define (html-ol attrs elements) `(ol ,@elements))
 (define (html-ul attrs elements) `(ul ,@elements))
@@ -111,6 +112,18 @@ handle it at the Pollen processing level.
           (findf-txexpr block-xpr is-newthought?)) ; Does it contain a <span class="newthought">?
       (attr-set block-xpr 'class "pause-before")   ; Add the ‘pause-before’ class
       block-xpr))   
+
+(define (html-comment attrs contents)
+  (check-required-attributes 'comment '(author datetime authorlink) attrs)
+  (let ([author (attr-val 'author attrs)]
+        [comment-date (attr-val 'datetime attrs)]
+        [authorlink (attr-val 'authorlink attrs)])
+       `(div [[class "comment-box"]]
+             (p [[class "comment-meta"]]
+                (span [[class "comment-name"]]
+                      (a [[href ,authorlink]] ,author))
+                (span [[class "comment-time"]] ,comment-date))
+             ,@contents)))
 
 #| otherjoel:
   ◊table : allows the creation of basic tables from a simplified notation.

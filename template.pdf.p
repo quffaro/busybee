@@ -1,17 +1,24 @@
 ◊(require racket/file racket/system)
+
+◊(define (print-if thing fmt)
+   (if thing (format fmt thing) ""))
+
 ◊(define latex-source ◊string-append{
-    \documentclass[a4paper,12pt]{article}
+    \documentclass[a4paper,twoside,12pt]{article}
     \usepackage{ragged2e}
+    \usepackage{marginnote}
     \usepackage{amsmath,amsfonts}
     \usepackage{tikz-cd}
     \usepackage[english]{babel}
     \usepackage[autostyle]{csquotes}
     \usepackage{hyperref,booktabs}
-    
+    \usepackage{adjustbox}
+
     \usepackage{listings}
     \lstset{extendedchars}
 
     \usepackage{eurosym}
+    \usepackage{fancyhdr}
     \usepackage{fancyvrb}
     \usepackage{longtable,booktabs}
     \usepackage{attrib}
@@ -28,7 +35,7 @@
 
     \defaultfontfeatures{Scale=MatchLowercase}
 
-    \usepackage{microtype}
+    \usepackage[final,nopatch=footnote]{microtype}
     \usepackage{fontspec}
 
     %% Typography defaults
@@ -106,7 +113,33 @@
         }%
     \endgroup
 
+    % this is for epigraphs
     \usepackage{epigraph}
+    \setlength\epigraphwidth{8cm}
+    \setlength\epigraphrule{0pt}
+    \usepackage{etoolbox}
+    \makeatletter
+    \patchcmd{\epigraph}{\@epitext{#1}}{\itshape\@epitext{#1}}{}{}
+    \makeatother
+
+    \usepackage{color}
+    \definecolor{marron}{RGB}{60,30,10}
+    \definecolor{darkblue}{RGB}{0,0,80}
+    \definecolor{lightblue}{RGB}{80,80,80}
+    \definecolor{darkgreen}{RGB}{0,80,0}
+    \definecolor{darkgray}{RGB}{0,80,0}
+    \definecolor{darkred}{RGB}{80,0,0}
+    \definecolor{shadecolor}{rgb}{0.97,0.97,0.97}
+    \usepackage{fourier-orns}
+
+    \fancyhf{}
+
+    \newcommand{\ornamento}{\vspace{2em}\noindent \textcolor{darkgray}{\hrulefill~ \raisebox{-2.5pt}[10pt][10pt]{\leafright \decofourleft \decothreeleft  \aldineright \decotwo \floweroneleft \decoone   \floweroneright \decotwo \aldineleft\decothreeright \decofourright \leafleft} ~  \hrulefill \\ \vspace{2em}}}
+    \newcommand{\ornpar}{\noindent \textcolor{darkgray}{ \raisebox{-1.9pt}[10pt][10pt]{\leafright} \hrulefill \raisebox{-1.9pt}[10pt][10pt]{\leafright \decofourleft \decothreeleft  \aldineright \decotwo \floweroneleft \decoone}}}
+\newcommand{\ornimpar}{\textcolor{darkgray}{\raisebox{-1.9pt}[10pt][10pt]{\decoone \floweroneright \decotwo \aldineleft \decothreeright \decofourright \leafleft} \hrulefill \raisebox{-1.9pt}[10pt][10pt]{\leafleft}}}
+
+    \fancyfoot[LO]{\ornimpar \\ \large \hfill \sffamily\bf \textcolor{darkgray}{\leafNE ~~~ \thepage}}
+    \fancyfoot[RE]{\ornpar   \\ \large  \sffamily\bf \textcolor{darkgray}{\thepage ~~~ \reflectbox{\leafNE}}\hfill}
 
         
     % see http://tex.stackexchange.com/questions/11263/how-can-i-remove-listing-from-listings-caption
@@ -136,15 +169,15 @@
                 urlcolor=blue,
                 linkcolor=magenta,
                 pdfborder={0 0 0}}
-    \urlstyle{same}  % don't use monospace font for urls
+    \urlstyle{same}  % dont use monospace font for urls
 
     % Make links footnotes instead of hotlinks:
-    \renewcommand{\href}[2]{#2\footnote{\url{#1}}}
+    \renewcommand{\href}[2]{{#2}\footnote{\url{#1}}}
 
 
     % Make margin notes (from Tufte-LaTeX) into regular footnotes
-    \newcommand{\marginnote}[1]{\footnote{#1}}
-    \newcommand{\smallcaps}[1]{\textsc{#1}}
+    %\newcommand{\marginnote}[1]{\footnote{#1}}
+    %\newcommand{\smallcaps}[1]{\textsc{#1}}
 
     \setlength{\parindent}{0pt}
     \setlength{\parskip}{6pt plus 2pt minus 1pt}
@@ -155,6 +188,9 @@
     \VerbatimFootnotes % allows verbatim text in footnotes
 
     %% Titling package allows for macros \thetitle \theauthor, etc
+    \usepackage{titling}
+    %\title{(select-from-metas 'title metas)}
+    %◊(print-if (select-from-metas 'author metas) "\\author{~a}")
 
     %% Reduced margins
     %\usepackage[margin=1.2in]{geometry}
@@ -186,30 +222,24 @@
     \usepackage{soul}
 
     \newcommand{\Spec}{\textup{Spec}}
-
+    
     \newcommand{\Ban}{\textsf{Ban}}
     \newcommand{\Man}{\textsf{Man}}
     \newcommand{\Meas}{\textsf{Meas}}
     \newcommand{\Para}{\textsf{Para}}
-
+    
     \newcommand{\el}{\textsf{el}}
-
+    
     \newcommand{\cM}{M}
     \newcommand{\cP}{P}
-
+    
     \newcommand{\FF}{\mathbb{F}}
     \newcommand{\RR}{\mathbb{R}}
     \newcommand{\ZZ}{\mathbb{Z}}
 
     \begin{document}
     \RaggedRight
-
-    %\begingroup
-    %    \centering
-    %    {\LARGE\bf \thetitle}\\[1em]
-    %    \par
-    %\endgroup
-
+ 
     ◊(apply string-append (cdr doc))
     
     \end{document}})

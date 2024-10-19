@@ -68,6 +68,7 @@
 (define (ltx-qt attrs elems) `(txt "\"" ,@elems "\""))
 (define (ltx-Qt attrs elems) `(txt "\\begin{quote}" ,@elems "\\end{quote}"))
 (define (ltx-newthought attrs elems) `(txt "\\newthought{" ,@(esc elems) "}"))
+(define (ltx-epigraph attrs elems) `(txt "\\epigraph{" ,@(esc elems) "}"))
 
 (define (ltx-ol attrs elems) `(txt "\\begin{itemize}" ,@elems "\\end{itemize}"))
 (define (ltx-ul attrs elems) `(txt "\\begin{enumerate}" ,@elems "\\end{enumerate}"))
@@ -88,6 +89,14 @@
 
 (define (ltx-link url attrs elems) `(zlink ,url ,@elems))
 (define (ltx-lank attrs elems) `(txt "[" ,@elems "]"))
+
+(define (ltx-comment attrs contents)
+  (check-required-attributes 'comment '(author datetime authorlink) attrs)
+  (let ([author (attr-val 'author attrs)]
+        [comment-date (attr-val 'datetime attrs)])
+       `(txt-comment "\\begin{quote}\n" ,@(esc contents)
+                     "\n\\attrib{" ,(ltx-escape-str author) ", " ,comment-date "}"
+                     "\n\\end{quote}\n\n")))
 
 (define (ltx-td-tag . tx-els) `(txt ,@(esc tx-els)))
 (define (ltx-th-tag . tx-els) `(txt ,@(esc tx-els)))

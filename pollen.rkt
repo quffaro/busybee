@@ -73,6 +73,7 @@
 (poly-branch-tag qt)
 (poly-branch-tag Qt)
 (poly-branch-tag newthought)
+(poly-branch-tag epigraph)
 
 (poly-branch-tag ol)
 (poly-branch-tag ul)
@@ -86,6 +87,8 @@
 (poly-branch-tag link url)
 (poly-branch-tag lank)
 ; TODO [[linking]]
+
+(poly-branch-tag comment (authorlink ""))
 
 (poly-branch-tag td-tag)
 (poly-branch-tag th-tag)
