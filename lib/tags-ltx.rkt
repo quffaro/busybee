@@ -35,6 +35,8 @@
                                       #:exclude-tags '(script style figure txt-noescape)))
   (txexpr 'body null (decode-elements first-pass #:inline-txexpr-proc txt-decode)))
 
+(define (ltx-ignore attrs elem) `(p ""))
+
 (define (ltx-title attrs elems) `(txt "Title: " ,@elems "}"))
 (define (ltx-taxon attrs elems) `(txt "Taxon: " ,@elems "}"))
 (define (ltx-author attrs elems) `(txt "Author: " ,@elems "}"))

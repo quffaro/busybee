@@ -43,6 +43,8 @@
 
 (poly-branch-tag root)
 
+(poly-branch-tag ignore)
+
 (poly-branch-tag title)
 (poly-branch-tag taxon)
 (poly-branch-tag author)

@@ -33,17 +33,31 @@
 #| 	(wrap-comment-section (txexpr 'body null second-pass) identity)) |#
 
 (define (html-root attrs elements)
-	(txexpr 'root empty elements))
+  (define first-pass (decode-elements (get-elements (wrap-comment-section (txexpr 'root null elements) identity))
+                                    #:inline-txexpr-proc identity
+                                    #:string-proc (compose1 smart-quotes smart-dashes)
+                                    #:exclude-tags '(script style figure)))
+  (txexpr 'body null (decode-elements first-pass)))
+
+#| (define (html-root attrs elements) |#
+#| 	(txexpr 'root empty elements)) |#
+
+(define (html-ignore attrs elem) `(p ""))
 
 (define (html-title attrs elems) `(p ,@elems))
 (define (html-taxon attrs elems) `(p ,@elems))
 (define (html-author attrs elems) `(p ,@elems))
 (define (html-import attrs elems) `(p ,@elems))
-(define (html-header attrs elems) 
-  (define header-val (format "\\title{~a}\n\\taxon{~a}\n\\author{~a}\n\\import{~a}\n\n" 
-										  (attr-val 'title attrs) (attr-val 'taxon attrs)
-										  (attr-val 'author attrs) (attr-val 'import attrs)))
-  `(header ,header-val))
+(define (html-header attrs elems)
+  (define the-title (attr-val 'title attrs))
+  (define the-taxon (attr-val 'taxon attrs))
+  (define the-author (attr-val 'author attrs))
+  `(header [[class "article-header"]]
+           (h1 [[class "title"]] ,the-title)
+           (div [[class "metadata"]]
+                (span [[class "taxon"]] ,the-taxon)
+                (span [[class "author"]] ,the-author))))
+
 
 ;
 (define (html-p attrs elems) `(p ,@elems))
@@ -53,34 +67,67 @@
 (define (html-caps attrs elems) `(span [[class "smallcaps"]] ,@elems))
 (define (html-strike attrs text) `(s ,@text))
 
-; TODO
-(define (html-thm attrs elems) `(p ,@elems))
-(define (html-proof attrs elems) `(p ,@elems))
+(define (html-thm attrs elems)
+  `(div [[class "theorem"]]
+        (strong "Theorem. ")
+        ,@elems))
 
+(define (html-proof attrs elems)
+  `(div [[class "proof"]]
+        (em "Proof. ")
+        ,@elems
+        "□"))
+
+; these are ok
 (define (html-h1 attrs title) `(h1 ,@title))
 (define (html-h2 attrs title) `(h2 ,@title))
 (define (html-h3 attrs title) `(h3 ,@title))
 
 ; TODO no Latex support
-(define (html-$ attrs elems) `(span "\\(" ,@elems "\\)"))
-(define (html-eq attrs elems) `(span "\\(" ,@elems "\\"))
-(define (html-tex attrs pkgs elems) `(span "\\(" ,@elems "\\"))
+(define (html-$ attrs elems)
+  `(span [[class "math"]] "\\(" ,@elems "\\)"))
 
-
-(define (html-? attrs elements) `(p ,@elements))
+(define (html-eq attrs elems)
+  `(div [[class "equation"]] 
+        "\\[" ,@elems "\\]"))
 
 ; TODO
-(define (html-qt attrs elements) `(p ,@elements))
-(define (html-Qt attrs elements) `(blockquote ,@elements))
-(define (html-newthought attrs elems)
-  `(span [[class "newthought"]] ,@elems))
-(define (html-epigraph attrs elems) `(p ,@elems))
+(define (html-tex attrs pkgs elems)
+  `(div [[class "math-display"]]
+        "\\[" ,@elems "\\]"))
 
+(define (html-? attrs elems)
+  `(div [[class "question"]]
+        (strong "Question: ")
+        ,@elems))
+
+; Quote tags
+(define (html-qt attrs elems)
+  `(q ,@elems))
+
+(define (html-Qt attrs elems)
+  `(blockquote [[class "extended-quote"]] ,@elems))
+
+(define (html-newthought attrs elems) `(p ,@elems))
+
+; Epigraph with attribution
+; TODO foot does not work
+(define (html-epigraph attrs elems)
+  `(blockquote [[class "epigraph"]]
+               (p ,@elems)
+               (footer [[class "attribution"]]
+                      "— " ,(attr-val 'by attrs))))
+
+; these are ok
 (define (html-ol attrs elements) `(ol ,@elements))
 (define (html-ul attrs elements) `(ul ,@elements))
 (define (html-li attrs elements) `(li ,@elements))
 
-(define (html-def attrs text) `(p ,@text))
+(define (html-def attrs elems)
+  `(span [[class "definition"]] 
+         (strong ,@elems)
+         (span [[class "def-text"]] " – " ,(attr-val 'def attrs))))
+
 (define (html-code attrs text) `(code ,@text))
 (define (html-pre attrs text)
 	(define filename (attr-val 'filename attrs))
@@ -89,9 +136,22 @@
 			[(string>? filename "") `(@ (div [[class "listing-filename"]] 128196 " " ,filename) ,codeblock)]
 			[else codeblock]))
 
-(define (html-include attrs text) `(p ,@text))
-(define (html-link url attrs elems) `(a [[href ,url]] ,@elems))
-(define (html-lank attrs elems) `(p ,@elems))
+; Include tag for external content
+(define (html-include attrs file)
+  (define mode (attr-val 'mode attrs))
+  (if (attr-val 'flat attrs)
+      `(div [[class "included-content flat"]] ,@file)
+      `(div [[class "included-content"]] ,@file)))
+
+; Link and anchor tags
+(define (html-link url attrs elems)
+  `(a [[href ,url] [class "external-link"]] ,@elems))
+
+(define (html-lank attrs elems)
+  `(span [[class "reference"]] "[" ,@elems "]"))
+
+#| (define (html-link url attrs elems) `(a [[href ,url]] ,@elems)) |#
+#| (define (html-lank attrs elems) `(p ,@elems)) |#
 
 #|
 detect-newthoughts: called by root above when targeting HTML.

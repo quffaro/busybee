@@ -1,26 +1,26 @@
 #lang racket/base
 
 (require racket/function
-		 racket/list
-		 racket/class
-		 racket/match
-		 racket/string)
+                 racket/list
+                 racket/class
+                 racket/match
+                 racket/string)
 
 (require "polytag.rkt"
-		 "common-helpers.rkt")
-		 
+                 "common-helpers.rkt")
+
 (require txexpr
-		 file/md5
-		 pollen/decode
-		 pollen/core
-		 pollen/setup
+                 file/md5
+                 pollen/decode
+                 pollen/core
+                 pollen/setup
          pollen/pagetree
-		 pollen/cache)
+                 pollen/cache)
 
 (provide (all-defined-out))
 
 #|
-	defunct
+        defunct
 |#
 (define definitions '())
 
@@ -71,24 +71,26 @@
                                       #:exclude-tags '(script style figure txt-noescape)))
   (txexpr 'body null (decode-elements first-pass #:inline-txexpr-proc txt-decode)))
 
+(define (pdf-ignore attrs elem) `(txt ""))
+
 (define (pdf-title attrs elems) `(txt "Title: " ,@elems "}"))
 (define (pdf-taxon attrs elems) `(txt "Taxon: " ,@elems "}"))
 (define (pdf-author attrs elems) `(txt "Author: " ,@elems "}"))
 (define (pdf-import attrs elems) `(txt "Import: " ,@elems "}"))
 
-(define (pdf-header attrs elems) 
-	(define the-title (attr-val 'title attrs))
-	(define the-taxon (attr-val 'taxon attrs))
-	(define the-author (attr-val 'author attrs))
-	(if (current-inclusion-context)
-		(case (param-render-as)
-		  [("part") `(txt "\\ornamento\\part{" ,the-title "}\n")]
-		  [("chapter") `(txt "\\ornamento\\chapter{" ,the-title "}\n")]
-		  [else `(txt "\\ornamento\\section{" ,the-title "}\n")])
-		`(txt "\\begingroup
-			  \\centering
-			  {\\LARGE\\bf " ,the-title " }\\\\[1em]
-			  \\endgroup")))
+(define (pdf-header attrs elems)
+        (define the-title (attr-val 'title attrs))
+        (define the-taxon (attr-val 'taxon attrs))
+        (define the-author (attr-val 'author attrs))
+        (if (current-inclusion-context)
+                (case (param-render-as)
+                  [("part") `(txt "\\ornamento\\part{" ,the-title "}\n")]
+                  [("chapter") `(txt "\\ornamento\\chapter{" ,the-title "}\n")]
+                  [else `(txt "\\ornamento\\section{" ,the-title "}\n")])
+                `(txt "\\begingroup
+                          \\centering
+                          {\\LARGE\\bf " ,the-title " }\\\\[1em]
+                          \\endgroup")))
 
 
 (define (pdf-p attrs elems) `(txt "" ,@elems "}\n\n"))
@@ -97,18 +99,18 @@
 (define (pdf-b attrs text) `(txt "{\\bfseries " ,@(esc text) "}"))
 (define (pdf-caps attrs text) `(txt "{\\scshape " ,@(esc text) "}"))
 #| (define (pdf-strike attrs text) `(txt "\\st{" ,@(esc text) "}")) |#
-(define (pdf-strike attrs text) 
+(define (pdf-strike attrs text)
   `(txt "\\marginpar[\raggedleft " ,(attr-val 'left attrs) "]{" ,@(esc text) "}"))
 
 (define (pdf-thm attrs elems) `(txt "\\begin{theorem}" ,@elems "\\end{theorem}"))
 (define (pdf-proof attrs elems) `(txt "\\begin{proof}" ,@elems "\\end{proof}"))
 
-(define (pdf-h1 attrs elems #:id [id 0]) `(txt "\\section*{" ,@elems "}"))
-(define (pdf-h2 attrs elems #:id [id 0]) `(txt "\\subsection*{" ,@elems "}"))
-(define (pdf-h3 attrs elems #:id [id 0]) `(txt "\\subsection*{" ,@elems "}"))
+(define (pdf-h1 attrs elems #:id [id 0]) `(txt "\\section{" ,@elems "}"))
+(define (pdf-h2 attrs elems #:id [id 0]) `(txt "\\subsection{" ,@elems "}"))
+(define (pdf-h3 attrs elems #:id [id 0]) `(txt "\\subsubsection{" ,@elems "}"))
 
-(define (pdf-$ attrs elems) (apply string-append `("$" ,@elems "$"))) 
-(define (pdf-eq attrs elems) `(txt-noescape "\\begin{equation}" ,@elems "\\end{equation}")) 
+(define (pdf-$ attrs elems) (apply string-append `("$" ,@elems "$")))
+(define (pdf-eq attrs elems) `(txt-noescape "\\begin{equation}" ,@elems "\\end{equation}"))
 (define (pdf-tex attrs pkgs elems) `(txt-noescape "\\begin{equation}" ,@elems "\\end{equation}"))
 
 (define (pdf-? attrs elems) `(txt "{\\textbf{Question} " ,@elems "}"))
@@ -147,16 +149,18 @@
 ; TODO filepath is a misnomer
 (define (pdf-include attrs file)
   (define mode (attr-val 'mode attrs))
-  (define filepath (symb-match-substring 
-	(get-pagetree (build-path (current-directory-for-user) "pdf.ptree")) (car file)))
+  (define filepath (symb-match-substring
+        (get-pagetree (build-path (current-directory-for-user) "pdf.ptree")) (car file)))
+  (displayln file)
   (displayln filepath)
+  #| (displayln (car filepath)) |#
   (if (attr-val 'flat attrs)
-	`(txt "\\include{" ,(path->string 
-						  (path-replace-extension 
-							(symbol->string (car filepath)) #".tex")) "}")
-	`(@ ,@(cdr (parameterize ([current-inclusion-context #t] [param-render-as mode])
-				 (get-doc (car filepath)))
-			   ))))
+        `(txt "\\include{" ,(path->string
+                                                  (path-replace-extension
+                                                        (symbol->string (car filepath)) #".tex")) "}")
+        `(@ ,@(cdr (parameterize ([current-inclusion-context #t] [param-render-as mode])
+                                 (get-doc (car filepath)))
+                           ))))
 ; TODO need better error handling. "car" fails if there's no file. but it's better to raise an error.
 
 (define (pdf-link url attrs elems) `(zlink ,url ,@elems))
@@ -179,18 +183,18 @@
     (cond
       [(null? lst)                ; If we reach the end of the list
        (reverse (cons (reverse current) acc))]  ; Append the last sublist
-      
+
       [(equal? (first lst) elem)  ; When we hit the split element
-       (helper (rest lst) 
-               (cons (reverse current) acc) 
+       (helper (rest lst)
+               (cons (reverse current) acc)
                '())]              ; Start a new sublist
-      
+
       [else                       ; Otherwise, keep accumulating the current list
-       (helper (rest lst) 
-               acc 
+       (helper (rest lst)
+               acc
                (cons (first lst) current))]))
-  
-  (helper lst '() '())) 
+
+  (helper lst '() '()))
 
 ; A lot of code duplicated between this function and the HTML one.
 ; Decided to do it this way to get complete independence between the
@@ -205,12 +209,12 @@
   ; TODO split list by newlines
   ; Split the arguments into rows (at "\n"), and split any string values into
   ; separate cells (at "|") and remove extra whitespace.
-  (define rows-parsed (for/list ([row (in-list (string-split joined "\n"))])	
+  (define rows-parsed (for/list ([row (in-list (string-split joined "\n"))])
                         (for/list ([cell (in-list (filter-not whitespace? (string-split row "|")))])
-								  ; TODO will whitespace? fail on txexprs?
+                                                                  ; TODO will whitespace? fail on txexprs?
                                           (if (string? cell)
                                               (string-trim cell)
-                                              cell)))) 
+                                              cell))))
 
   ; Clean things up using the helper function above
   (define rows-of-cells (filter-not null? (map clean-cells-in-row rows-parsed)))

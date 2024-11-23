@@ -32,6 +32,8 @@
 									   #:exclude-tags '(tex)))
   (txexpr 'body null second-pass))
 
+(define (tree-ignore attrs elem) `(txt ""))
+
 (define (tree-title attrs elems) (apply string-append `("\\title{" ,@elems "}")))
 (define (tree-taxon attrs elems) (apply string-append `("\\taxon{" ,@elems "}")))
 (define (tree-author attrs elems) (apply string-append `("\\author{" ,@elems "}")))

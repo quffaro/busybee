@@ -9,6 +9,6 @@
 ◊(define (include-many-files folders)
 	(apply append (map (λ(x) (include-files x "poly.pm")) folders)))
 
-◊(define this-pagetree `(@ ,@(include-many-files '("posts/public" "posts/public/busybee" "posts/in-progress/definitions" "posts/in-progress" "posts/in-progress/peirce-hegel" "posts/in-progress/new-dialectic-marxs-capital" "posts/in-progress/circle-of-circles" "posts/in-progress/circle-of-circles/cou" "posts/backburner"))))
+◊(define this-pagetree `(@ ,@(include-many-files '("posts/zeta-functions" "posts/circle-of-circles" "posts/circle-of-circles/cou"))))
 
 ◊this-pagetree

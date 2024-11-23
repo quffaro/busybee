@@ -7,12 +7,14 @@
     \documentclass[a4paper,twoside,12pt]{article}
     \usepackage{ragged2e}
     \usepackage{marginnote}
-    \usepackage{amsmath,amsfonts}
+    \usepackage{amsmath,amsfonts,amsthm}
     \usepackage{tikz-cd}
     \usepackage[english]{babel}
     \usepackage[autostyle]{csquotes}
     \usepackage{hyperref,booktabs}
     \usepackage{adjustbox}
+
+    \newtheorem{theorem}{Theorem}
 
     \usepackage{listings}
     \lstset{extendedchars}
@@ -42,13 +44,13 @@
     \newfontfamily\linenumberfont[Mapping=tex-text]{CMU Serif}
 
     % \setsansfont[
-        % ItalicFont     = HelveticaNeue-Italic,
-        % BoldFont       = HelveticaNeue-Bold,
-        % BoldItalicFont = HelveticaNeue-BoldItalic]{HelveticaNeue}
+	% ItalicFont     = HelveticaNeue-Italic,
+	% BoldFont       = HelveticaNeue-Bold,
+	% BoldItalicFont = HelveticaNeue-BoldItalic]{HelveticaNeue}
     %\setmainfont[Mapping=tex-text,SmallCapsFeatures={LetterSpace=5.5}]{Bitstream Charter}
     \setmainfont{Charter}
     \setmonofont[%
-        Scale = 0.8]{JuliaMono Nerd Font Propo}
+	Scale = 0.8]{JuliaMono Nerd Font Propo}
     % \newfontfamily\NHLight[
        % ItalicFont     = HelveticaNeue-LightItalic,
        % BoldFont       = HelveticaNeue-UltraLight,
@@ -78,24 +80,24 @@
     \usepackage{upquote}
     \usepackage{listingsutf8}
     \lstset{
-        inputencoding=utf8,
-        extendedchars=true,
-        basicstyle=\scriptsize\ttfamily,
-        columns=flexible,
-        breaklines=true,
-        numbers=left,
-        upquote=true,
-        backgroundcolor=\color{antiquewhite},
-        numbersep=5pt,
-        frame=single,
-        framesep=\fboxsep,
-        framerule=\fboxrule,
-        rulecolor=\color{black},
-        xleftmargin=\dimexpr\fboxsep+\fboxrule,
-        xrightmargin=\dimexpr\fboxsep+\fboxrule,
-        framexleftmargin=.25in,
-        % belowcaptionskip=0pt,
-        numberstyle=\scriptsize\color{mygray}\linenumberfont
+	inputencoding=utf8,
+	extendedchars=true,
+	basicstyle=\scriptsize\ttfamily,
+	columns=flexible,
+	breaklines=true,
+	numbers=left,
+	upquote=true,
+	backgroundcolor=\color{antiquewhite},
+	numbersep=5pt,
+	frame=single,
+	framesep=\fboxsep,
+	framerule=\fboxrule,
+	rulecolor=\color{black},
+	xleftmargin=\dimexpr\fboxsep+\fboxrule,
+	xrightmargin=\dimexpr\fboxsep+\fboxrule,
+	framexleftmargin=.25in,
+	% belowcaptionskip=0pt,
+	numberstyle=\scriptsize\color{mygray}\linenumberfont
     }
 
     % Add the lozenge to the list of extended characters in the `listings`
@@ -104,13 +106,13 @@
     % See https://tex.stackexchange.com/q/81674
     %
     \begingroup
-        \catcode0=12 %
-        \makeatletter
-        \g@addto@macro\lst@DefEC{%
-            \lst@CCECUse\lst@ProcessLetter
-            ◊"◊"% *** add Unicode characters ***
-            ^^00% end marker
-        }%
+	\catcode0=12 %
+	\makeatletter
+	\g@addto@macro\lst@DefEC{%
+	    \lst@CCECUse\lst@ProcessLetter
+	    ◊"◊"% *** add Unicode characters ***
+	    ^^00% end marker
+	}%
     \endgroup
 
     % this is for epigraphs
@@ -141,14 +143,14 @@
     \fancyfoot[LO]{\ornimpar \\ \large \hfill \sffamily\bf \textcolor{darkgray}{\leafNE ~~~ \thepage}}
     \fancyfoot[RE]{\ornpar   \\ \large  \sffamily\bf \textcolor{darkgray}{\thepage ~~~ \reflectbox{\leafNE}}\hfill}
 
-        
+
     % see http://tex.stackexchange.com/questions/11263/how-can-i-remove-listing-from-listings-caption
     % and http://tex.stackexchange.com/questions/209764/how-can-i-make-the-width-of-the-caption-match-that-of-the-listing
     \usepackage{calc}
     \usepackage[skip=0pt,position=auto]{caption}
     \DeclareCaptionFont{white}{\scriptsize\color{white}\ttfamily}
     \DeclareCaptionFormat{listing}{%
-        \fcolorbox{black}{gray}{\parbox{\textwidth-2\fboxsep-2\fboxrule}{#1#2#3}}%
+	\fcolorbox{black}{gray}{\parbox{\textwidth-2\fboxsep-2\fboxrule}{#1#2#3}}%
     }
     \captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white}
 
@@ -160,15 +162,15 @@
     % Scale images if necessary, so that they will not overflow the page
     % margins by default, and it is still possible to overwrite the defaults
     % using explicit options in \includegraphics[width, height, ...]{}
-    \setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio} 
+    \setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
 
     \hypersetup{breaklinks=true,
-                bookmarks=true,
-                colorlinks=true,
-                citecolor=blue,
-                urlcolor=blue,
-                linkcolor=magenta,
-                pdfborder={0 0 0}}
+		bookmarks=true,
+		colorlinks=true,
+		citecolor=blue,
+		urlcolor=blue,
+		linkcolor=magenta,
+		pdfborder={0 0 0}}
     \urlstyle{same}  % dont use monospace font for urls
 
     % Make links footnotes instead of hotlinks:
@@ -211,8 +213,8 @@
     \usepackage[splitrule,multiple,hang]{footmisc}
     \makeatletter
     \renewcommand\@makefntext[1]{\parindent 1em%
-        \noindent
-        \hb@xt@0em{\hss\normalfont\@thefnmark.} #1}
+	\noindent
+	\hb@xt@0em{\hss\normalfont\@thefnmark.} #1}
     \def\splitfootnoterule{\kern-3\p@ \hrule width 1in \kern2.6\p@}
     \makeatother
     \renewcommand\footnotesize{\fontsize{10}{12} \selectfont}
@@ -221,27 +223,40 @@
     % Allow use of \st for strikethrough
     \usepackage{soul}
 
+    \newcommand{\tens}{\otimes}
+
     \newcommand{\Spec}{\textup{Spec}}
-    
+
+    \newcommand{\Graph}{\textsf{Graph}}
     \newcommand{\Ban}{\textsf{Ban}}
     \newcommand{\Man}{\textsf{Man}}
     \newcommand{\Meas}{\textsf{Meas}}
     \newcommand{\Para}{\textsf{Para}}
-    
+    \newcommand{\Sch}{\textsf{Sch}}
+    \newcommand{\Dynam}{\textsf{Dynam}}
+
     \newcommand{\el}{\textsf{el}}
-    
+
     \newcommand{\cM}{M}
     \newcommand{\cP}{P}
-    
+
+    \newcommand{\fkp}{\mathfrak{p}}
+
+    \newcommand{\CC}{\mathbb{C}}
     \newcommand{\FF}{\mathbb{F}}
+    \newcommand{\TT}{\mathbb{T}}
+    \newcommand{\PP}{\mathbb{P}}
+    \newcommand{\QQ}{\mathbb{Q}}
     \newcommand{\RR}{\mathbb{R}}
     \newcommand{\ZZ}{\mathbb{Z}}
 
+    \newcommand{\oO}{\mathcal{O}}
+
     \begin{document}
     \RaggedRight
- 
+
     ◊(apply string-append (cdr doc))
-    
+
     \end{document}})
 ◊(define working-directory
     (make-temporary-file "pollen-latex-work-~a" 'directory))
