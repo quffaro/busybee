@@ -4,7 +4,8 @@
                  racket/list
                  racket/class
                  racket/match
-                 racket/string)
+                 racket/string
+                 racket/sequence)
 
 (require "polytag.rkt"
                  "common-helpers.rkt")
@@ -78,6 +79,7 @@
 (define (pdf-author attrs elems) `(txt "Author: " ,@elems "}"))
 (define (pdf-import attrs elems) `(txt "Import: " ,@elems "}"))
 
+;; GENERALIZE
 (define (pdf-header attrs elems)
         (define the-title (attr-val 'title attrs))
         (define the-taxon (attr-val 'taxon attrs))
@@ -105,7 +107,7 @@
 (define (pdf-thm attrs elems) `(txt "\\begin{theorem}" ,@elems "\\end{theorem}"))
 (define (pdf-proof attrs elems) `(txt "\\begin{proof}" ,@elems "\\end{proof}"))
 
-(define (pdf-h1 attrs elems #:id [id 0]) `(txt "\\section{" ,@elems "}"))
+(define (pdf-h1 attrs elems #:id [id 0]) `(txt "\\newpage\\section{" ,@elems "}"))
 (define (pdf-h2 attrs elems #:id [id 0]) `(txt "\\subsection{" ,@elems "}"))
 (define (pdf-h3 attrs elems #:id [id 0]) `(txt "\\subsubsection{" ,@elems "}"))
 
@@ -121,34 +123,50 @@
 (define (pdf-epigraph attrs elems) `(txt "\\epigraph{" ,@(esc elems) "}{--- " ,(attr-val 'by attrs) "}"))
 
 (define (pdf-ol attrs elems) `(txt "\\begin{itemize}" ,@elems "\\end{itemize}"))
-(define (pdf-ul attrs elems) `(txt "\\begin{enumerate}" ,@elems "\\end{enumerate}"))
+(define (pdf-ul attrs elems) `(txt "\\begin{enumerate}[itemsep=2pt,parsep=2pt]" ,@elems "\\end{enumerate}"))
 (define (pdf-li attrs elems) `(txt "\\item{" ,@elems "}"))
 
 (define (pdf-def attrs elems)
   (add-definition elems (attr-val 'def attrs))
   `(txt "\\textbf{" ,@elems "}"))
 
+;; TODO generalize:
+;;	- lang
+;;	- whether you should update
+;;	- creating directories and such
+(define (tangle attrs text)
+  (define lang (attr-val 'lang attrs))
+  (define exists (attr-val 'exists attrs))
+  (define filename (attr-val 'filename attrs))
+  ;;
+  (define out (open-output-file #:exists 'append (string->path filename)))
+  (display (string-join text) out)
+  (close-output-port out))
+
 (define (pdf-code attrs text)
+  (tangle attrs text)
   `(txt "\\texttt{"
         ,@(esc (list (string-replace (apply string-append text) "\\" "\\textbackslash ")))
         "}"))
+
 #| (define (pdf-code attrs elems) `(txt "\\texttt{" ,@elems "}")) |#
 (define (pdf-pre attrs text)
   (define filename (attr-val 'filename attrs))
+  (tangle attrs text) ;; TODO
   (define caption
           ; Note that using title= instead of caption= prevents listings from showing up in
           ; the "List of Listings" in the table of contents
           (if (string>? filename "") (string-append "[title={" filename "}]") ""))
   `(txt-noescape "\\begin{lstlisting}" ,caption "\n" ,@text "\n\\end{lstlisting}"))
-#| (define (pdf-pre attrs elems) `(txt "\\begin{verbatim}" ,@elems "\\end{verbatim}")) |#
 
 (define current-inclusion-context (make-parameter #f))
 (define param-render-as (make-parameter #f))
 
-#| (define (pdf-include attrs file) `(txt-noescape ,@file)) |#
 ; TODO filepath is a misnomer
+; TODO want better error handling if file is not in pagetree
 (define (pdf-include attrs file)
   (define mode (attr-val 'mode attrs))
+  #| (displayln (get-pagetree (build-path (current-directory-for-user) "pdf.ptree"))) |#
   (define filepath (symb-match-substring
         (get-pagetree (build-path (current-directory-for-user) "pdf.ptree")) (car file)))
   (displayln file)
@@ -156,8 +174,8 @@
   #| (displayln (car filepath)) |#
   (if (attr-val 'flat attrs)
         `(txt "\\include{" ,(path->string
-                                                  (path-replace-extension
-                                                        (symbol->string (car filepath)) #".tex")) "}")
+                               (path-replace-extension
+                                 (symbol->string (car filepath)) #".tex")) "}")
         `(@ ,@(cdr (parameterize ([current-inclusion-context #t] [param-render-as mode])
                                  (get-doc (car filepath)))
                            ))))

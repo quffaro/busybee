@@ -1,5 +1,21 @@
 ◊(require racket/file racket/system)
 
+◊(require (file "~/Documents/personal/repos/busybee/lib/ltx-helper.rkt"))
+
+◊(define bf-commands (generate-all-math-letters "mathbf"
+	 #:func (lambda (x) (string x x))))
+◊(define bb-commands (generate-all-math-letters "mathbb"
+	 #:func (lambda (x) (string x (char-downcase x)))))
+◊(define sf-commands (generate-all-math-letters "mathsf"
+	 #:func (lambda (x) (string (char-downcase x) x))))
+◊(define fk-commands (generate-all-math-letters "mathfrak"
+	 #:func (lambda (x) (string-append "fk" (string x)))))
+◊(define fk-lower-commands (generate-all-math-letters "mathfrak"
+	 #:func (lambda (x) (string-append "fk" (string-downcase (string x))))
+	 #:transform char-downcase))
+◊(define cal-commands (generate-all-math-letters "mathcal"
+    #:func (lambda (x) (string-append "c" x x))))
+
 ◊(define (print-if thing fmt)
    (if thing (format fmt thing) ""))
 
@@ -7,7 +23,7 @@
     \documentclass[a4paper,twoside,12pt]{article}
     \usepackage{ragged2e}
     \usepackage{marginnote}
-    \usepackage{amsmath,amsfonts,amsthm}
+    \usepackage{amsmath,amsfonts,amsthm,amssymb}
     \usepackage{tikz-cd}
     \usepackage[english]{babel}
     \usepackage[autostyle]{csquotes}
@@ -19,6 +35,7 @@
     \usepackage{listings}
     \lstset{extendedchars}
 
+    \usepackage{enumitem}
     \usepackage{eurosym}
     \usepackage{fancyhdr}
     \usepackage{fancyvrb}
@@ -227,30 +244,39 @@
 
     \newcommand{\Spec}{\textup{Spec}}
 
+    \newcommand{\Set}{\textsf{Set}}
+    \newcommand{\FinSet}{\textsf{FinSet}}
+    \newcommand{\Top}{\textsf{Top}}
     \newcommand{\Graph}{\textsf{Graph}}
     \newcommand{\Ban}{\textsf{Ban}}
     \newcommand{\Man}{\textsf{Man}}
+    \newcommand{\CompMan}{\textsf{CompMan}}
     \newcommand{\Meas}{\textsf{Meas}}
     \newcommand{\Para}{\textsf{Para}}
     \newcommand{\Sch}{\textsf{Sch}}
     \newcommand{\Dynam}{\textsf{Dynam}}
+
+    \newcommand{\Diff}{\textsf{Diff}}
+    \newcommand{\PSh}{\textsf{PSh}}
+    \newcommand{\Sh}{\textsf{Sh}}
+    \newcommand{\Tw}{\textsf{Tw}}
+
+    \newcommand{\Conf}{\textsf{Conf}}
 
     \newcommand{\el}{\textsf{el}}
 
     \newcommand{\cM}{M}
     \newcommand{\cP}{P}
 
-    \newcommand{\fkp}{\mathfrak{p}}
+    ◊|bf-commands|
+    ◊|bb-commands|
+    ◊|sf-commands|
+    ◊|fk-commands|
+    ◊|fk-lower-commands|
+    ◊|cal-commands|
 
-    \newcommand{\CC}{\mathbb{C}}
-    \newcommand{\FF}{\mathbb{F}}
-    \newcommand{\TT}{\mathbb{T}}
-    \newcommand{\PP}{\mathbb{P}}
-    \newcommand{\QQ}{\mathbb{Q}}
-    \newcommand{\RR}{\mathbb{R}}
-    \newcommand{\ZZ}{\mathbb{Z}}
-
-    \newcommand{\oO}{\mathcal{O}}
+    \usetikzlibrary{calc,intersections,through,backgrounds}
+    \usepackage{tkz-euclide}
 
     \begin{document}
     \RaggedRight

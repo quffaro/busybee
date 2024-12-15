@@ -4,7 +4,7 @@
 
 Busybee is a Pollen-based publishing application with special support for Forester. Consistent with the Pollen philosophy of a _single standard markup language_, writing notes can be done in a standard markup which can be transpiled to `html`, `md`, `tree`, `pdf`, or any other format you are willing to implement. 
 
-Busybee intends to unite the Pollen design principle of [the book is a program](https://docs.racket-lang.org/pollen/big-picture.html#%28part._the-book-is-a-program) with Jon Sterling's meditations on [evergreen, atomic notes for scientific thought](https://www.jonmsterling.com/tfmt-0001.xml). Our notes should be programmable snippets of source code written in a customizable markup that remains independent of their target application, be it word processing, note-taking, etc. By abstracting ourselves from our notes' dependencies on their authorship platform, we can better achieve "evergreen" notes without retreating from our criteria (atavism) or refusing to change tools (inertia).
+Busybee intends to unite the Pollen design principle of [the book is a program](https://docs.racket-lang.org/pollen/big-picture.html#%28part._the-book-is-a-program) with Jon Sterling's meditations on [evergreen, atomic notes for scientific thought](https://www.jonmsterling.com/tfmt-0001.xml). Our notes should be programmable snippets of source code written in a customizable markup. This allows each target application, be it word processing, note-taking, etc. to handle information differently while keeping the source the same. By abstracting ourselves from our notes' dependencies on their authorship platform, we can better achieve "evergreen" notes without retreating from our criteria (atavism) or an unprincipled refusal to change tools (inertia).
 
 ## Why Pollen?
 
@@ -14,7 +14,9 @@ Pollen's objective is to offer a **single** **programmable** markup language, no
 
 ### Busybee
 
-You will need Pollen installed on your machine.
+You will need Pollen installed.
+
+#### Arch Linux
 
 You will need a config.toml file.
 
@@ -26,6 +28,8 @@ You can add your forest as a git submodule. This allows you to generate trees us
 git submodule add $your_forest_url forest
 git -C forest checkout main
 ```
+
+### Your First Render
 
 ## FAQs
 
