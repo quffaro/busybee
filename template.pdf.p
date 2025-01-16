@@ -14,7 +14,7 @@
 	 #:func (lambda (x) (string-append "fk" (string-downcase (string x))))
 	 #:transform char-downcase))
 ◊(define cal-commands (generate-all-math-letters "mathcal"
-    #:func (lambda (x) (string-append "c" x x))))
+    #:func (lambda (x) (string-append "c" (string x) (string x)))))
 
 ◊(define (print-if thing fmt)
    (if thing (format fmt thing) ""))
@@ -246,9 +246,11 @@
 
     \newcommand{\Set}{\textsf{Set}}
     \newcommand{\FinSet}{\textsf{FinSet}}
+    \newcommand{\FinStoch}{\textsf{FinStoch}}
     \newcommand{\Top}{\textsf{Top}}
     \newcommand{\Graph}{\textsf{Graph}}
     \newcommand{\Ban}{\textsf{Ban}}
+    \newcommand{\BanMan}{\textsf{BanMan}}
     \newcommand{\Man}{\textsf{Man}}
     \newcommand{\CompMan}{\textsf{CompMan}}
     \newcommand{\Meas}{\textsf{Meas}}
@@ -263,6 +265,7 @@
 
     \newcommand{\Conf}{\textsf{Conf}}
 
+    \newcommand{\Kl}{\textsf{Kl}}
     \newcommand{\el}{\textsf{el}}
 
     \newcommand{\cM}{M}

@@ -14,6 +14,7 @@
     (fst letter) (snd letter) cmd letter))
 
 (define (generate-all-math-letters cmd #:func [f identity] #:transform [g identity])
+  (display cmd)
   (define commands
     (map (lambda (letter)
            (generate-math-letter-cmd cmd (g letter) #:func f))
