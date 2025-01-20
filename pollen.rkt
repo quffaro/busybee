@@ -6,96 +6,302 @@
          pollen/core
          pollen/private/version
          txexpr
-         pollen/tag         ; default-tag-function
-         "lib/polytag.rkt"
-         "lib/tags-html.rkt"
-         "lib/tags-tree.rkt"
-		 "lib/tags-ltx.rkt"
-		 "lib/tags-pdf.rkt")
+         pollen/tag
+		 pollen/pagetree
+		 "lib/common-helpers.rkt")         ; default-tag-function
 
 (provide string-split
-         pollen:version
-         (all-from-out "lib/tags-tree.rkt"))
+         pollen:version)
 (provide (all-defined-out))
 (provide for/s)
 
 (module setup racket/base
   (require "lib/target.rkt")
-  (provide (all-defined-out)
-           poly-targets)
+  (provide (all-defined-out))
+  (define poly-targets '(tree ltx pdf html)))
 
- (require syntax/modresolve racket/runtime-path)
-  (define-runtime-path lib/common-helpers.rkt "lib/common-helpers.rkt")
-  (define-runtime-path lib/polytag.rkt "lib/polytag.rkt")
-  (define-runtime-path lib/tags-html.rkt "lib/tags-html.rkt")
-  (define-runtime-path lib/tags-tree.rkt "lib/tags-tree.rkt")
-  (define-runtime-path lib/tags-ltx.rkt "lib/tags-ltx.rkt")
-  (define-runtime-path lib/tags-pdf.rkt "lib/tags-pdf.rkt")
-  
-  (define cache-watchlist
-    (map resolve-module-path
-         (list lib/common-helpers.rkt
-               lib/polytag.rkt
-               lib/tags-html.rkt
-               lib/tags-tree.rkt
-			   lib/tags-ltx.rkt
-			   lib/tags-pdf.rkt))))
+(define (attr-val key attributes)
+  (let ([result (assq key attributes)])
+       (if result (second result) #f)))
 
-(poly-branch-tag root)
+(define (ltx-escape-str str)
+  (identity str))
 
-(poly-branch-tag ignore)
+(define (esc elems)
+  (for/list ([e (in-list elems)])
+            (if (string? e) (ltx-escape-str e) e)))
 
-(poly-branch-tag title)
-(poly-branch-tag taxon)
-(poly-branch-tag author)
-(poly-branch-tag import)
-(poly-branch-tag header (title "") (taxon "template") (author "yourself!") (import ""))
+(define (pdf-link-decoder inline-txpr)
+  (if (eq? 'zlink (get-tag inline-txpr))
+      (let ([elems (get-elements inline-txpr)])
+           `(txt "\\href{" ,(ltx-escape-str (first elems)) "}"
+                 "{" ,@(esc (rest elems)) "}"))
+      inline-txpr))
+
+(define-tag-function (root attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) (let ()
+		(define first-pass (decode-elements (get-elements (wrap-comment-section (txexpr 'root null (esc elems)) esc))
+                                      #:inline-txexpr-proc (compose1 txt-decode pdf-link-decoder)
+                                      #:string-proc (compose1 smart-quotes smart-dashes)
+                                      #:exclude-tags '(script style figure txt-noescape)))
+  (txexpr 'body null (decode-elements first-pass #:inline-txexpr-proc txt-decode)))]
+	[else elems]))
+
+(define-tag-function (header attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf)  
+        (if (current-inclusion-context)
+                (case (param-render-as)
+                  [("part") `(txt "\\ornamento\\part{" ,(attr-val 'title attrs) "}\n")]
+                  [("chapter") `(txt "\\ornamento\\chapter{" ,(attr-val 'title attrs) "}\n")]
+                  [else `(txt "\\ornamento\\section{" ,(attr-val 'title attrs) "}\n")])
+                `(txt "\\begingroup
+                          \\centering
+                          {\\LARGE\\bf " ,(attr-val 'title attrs) " }\\\\[1em]
+                          \\endgroup"))]
+	[else elems]))
+
+(define-tag-function (ignore attrs elems) `(txt ""))
 
 ; simple tag with no required or default attributes
-(poly-branch-tag p)
-(poly-branch-tag b)
-(poly-branch-tag em)
-(poly-branch-tag i)
-(poly-branch-tag caps)
-(poly-branch-tag strike)
+(define-tag-function (p attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(txt "" ,@elems "}\n\n")]
+	[else elems]))
 
-(poly-branch-tag thm)
-(poly-branch-tag proof)
+(define-tag-function (b attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(txt "{\\bfseries " ,@(esc elems) "}")]
+	[else elems]))
+(define-tag-function (em attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(txt "{\\emph " ,@(esc elems) "}")]
+	[else elems]))
+(define-tag-function (i attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(txt "{\\itshape " ,@(esc elems) "}")]
+	[else elems]))
+(define-tag-function (caps attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(txt "{\\scshape " ,@(esc elems) "}")]
+	[else elems]))
+(define-tag-function (strike attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(txt "\\marginpar[\raggedleft " ,(attr-val 'left attrs) "]{" ,@(esc elems) "}")]
+	[else elems]))
 
-(poly-branch-tag h1)
-(poly-branch-tag h2)
-(poly-branch-tag h3)
+(define-tag-function (thm attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(txt "\\begin{theorem}" ,@elems "\\end{theorem}")]
+	[else elems]))
+(define-tag-function (proof attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(txt "\\begin{proof}" ,@elems "\\end{proof}")]
+	[else elems]))
 
-(poly-branch-tag $)
-(poly-branch-tag eq)
-(poly-branch-tag tex)
+(define-tag-function (h1 attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(txt "\\newpage\\section{" ,@elems "}")]
+	[else elems]))
+(define-tag-function (h2 attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(txt "\\subsection{" ,@elems "}")]
+	[else elems]))
+(define-tag-function (h3 attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(txt "\\subsubsection{" ,@elems "}")]
+	[else elems]))
 
-(poly-branch-tag ?)
+(define-tag-function ($ attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) (apply string-append `("$" ,@elems "$"))]
+	[else elems]))
+(define-tag-function (eq attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(txt-noescape "\\begin{equation}" ,@elems "\\end{equation}")]
+	[else elems]))
+(define-tag-function (tex attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(txt-noescape "\\begin{equation}" ,@elems "\\end{equation}")]
+	[else elems]))
 
-(poly-branch-tag qt)
-(poly-branch-tag Qt)
-(poly-branch-tag newthought)
-(poly-branch-tag epigraph)
+(define-tag-function (? attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(txt-noescape "\\textbf{Question}" ,@elems "")]
+	[else elems]))
 
-(poly-branch-tag ol)
-(poly-branch-tag ul)
-(poly-branch-tag li)
+(define-tag-function (qt attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(txt-noescape "``" ,@elems "\"")]
+	[else elems]))
+(define-tag-function (Qt attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(txt-noescape "\\begin{quote}" ,@elems "\\end{quote}")]
+	[else elems]))
+(define-tag-function (epigraph attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(txt-noescape "\\epigraph{" ,@(esc elems) "}{--- " ,(attr-val 'by attrs) "}")]
+	[else elems]))
 
-(poly-branch-tag def)
-(poly-branch-tag code)
-(poly-branch-tag pre)
+(define-tag-function (ol attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(txt "\\begin{itemize}" ,@elems "\\end{itemize}")]
+	[else elems]))
+(define-tag-function (ul attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(txt "\\begin{enumerate}[itemsep=2pt,parsep=2pt]" ,@elems "\\end{enumerate}")]
+	[else elems]))
+(define-tag-function (li attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(txt "\\item{" ,@elems "}")]
+	[else elems]))
 
-(poly-branch-tag include)
-(poly-branch-tag link url)
-(poly-branch-tag lank)
-; TODO [[linking]]
+(define-tag-function (def attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) 
+		#| (add-definition elems (attr-val 'def attrs)) |#
+		`(txt "\\textbf{" ,@elems "}")]
+	[else elems]))
 
-(poly-branch-tag comment (authorlink ""))
+;; TODO generalize:
+;;	- lang
+;;	- whether you should update
+;;	- creating directories and such
+(define (tangle attrs text)
+  (define lang (attr-val 'lang attrs))
+  (define exists (attr-val 'exists attrs))
+  (define filename (attr-val 'filename attrs))
+  ;;
+  (define out (open-output-file #:exists 'append (string->path filename)))
+  (display (string-join text) out)
+  (close-output-port out))
 
-(poly-branch-tag td-tag)
-(poly-branch-tag th-tag)
-(poly-branch-tag tr-tag)
-(poly-branch-tag table (columns #f))
+(define-tag-function (code attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) (
+		(tangle attrs elems)
+		`(txt "\\texttt{"
+			  ,@(esc (list (string-replace (apply string-append elems) "\\" "\\textbackslash "))) "}"))]
+	[else elems]))
+(define-tag-function (pre attrs elems)
+  (case (current-poly-target)
+	([ltx pdf] (let ()
+		(define filename (attr-val 'filename attrs))
+		(tangle attrs elems) ;; TODO
+		(define caption
+          ; Note that using title= instead of caption= prevents listings from showing up in
+          ; the "List of Listings" in the table of contents
+          (if (string>? filename "") (string-append "[title={" filename "}]") ""))
+			`(txt-noescape "\\begin{lstlisting}" ,caption "\n" ,@elems "\n\\end{lstlisting}")))
+	[else elems]))
+
+(define current-inclusion-context (make-parameter #f))
+(define param-render-as (make-parameter #f))
+
+(define-tag-function (include attrs file)
+  (case (current-poly-target)
+	[(ltx pdf) (let () (define mode (attr-val 'mode attrs))
+	#| (displayln (get-pagetree (build-path (current-directory-for-user) "pdf.ptree"))) |#
+	(define filepath (symb-match-substring
+        (get-pagetree (build-path (current-directory-for-user) "pdf.ptree")) (car file)))
+	(displayln file)
+	(displayln filepath)
+	(if (attr-val 'flat attrs)
+        `(txt "\\include{" ,(path->string
+                               (path-replace-extension
+                                 (symbol->string (car filepath)) #".tex")) "}")
+        `(@ ,@(cdr (parameterize ([current-inclusion-context #t] [param-render-as mode])
+                                 (get-doc (car filepath)))
+                           ))))]
+	[else file]))
+
+(define-tag-function (link attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(zlink ,(attr-val attrs 'url) ,@elems)]
+	[else elems]))
+
+(define (split-by-element lst elem)
+  (define (helper lst acc current)
+    (cond
+      [(null? lst)                ; If we reach the end of the list
+       (reverse (cons (reverse current) acc))]  ; Append the last sublist
+
+      [(equal? (first lst) elem)  ; When we hit the split element
+       (helper (rest lst)
+               (cons (reverse current) acc)
+               '())]              ; Start a new sublist
+
+      [else                       ; Otherwise, keep accumulating the current list
+       (helper (rest lst)
+               acc
+               (cons (first lst) current))]))
+
+  (helper lst '() '()))
+
+
+(define (td-tag . elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(txt ,@(esc elems))]
+	[else elems]))
+(define (th-tag . elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(txt ,@(esc elems))]
+	[else elems]))
+(define (tr-tag . elems)
+  (case (current-poly-target)
+	[(ltx pdf) `(txt ,@(add-between elems " & ") " \\\\\n")]
+	[else elems]))
+
+(define-tag-function (table attrs elems)
+  (case (current-poly-target)
+	[(ltx pdf) (let ()
+      ; A lot of code duplicated between this function and the HTML one.
+      ; Decided to do it this way to get complete independence between the
+      ; HTML and PDF paths.
+	  (define c-aligns (attr-val 'columns attrs))
+	  (cond [(not (or (equal? #f c-aligns) (column-alignments-string? c-aligns)))
+         (raise-argument-error 'table "#:columns must be a string containing 'l', 'r', or 'c'" (assq 'columns attrs))])
+
+  ; we need to figure out how to handle arbitrary xexprs
+  (define joined (string-join elems))
+  ; TODO split list by newlines
+  ; Split the arguments into rows (at "\n"), and split any string values into
+  ; separate cells (at "|") and remove extra whitespace.
+  (define rows-parsed (for/list ([row (in-list (string-split joined "\n"))])
+                        (for/list ([cell (in-list (filter-not whitespace? (string-split row "|")))])
+                                                                  ; TODO will whitespace? fail on txexprs?
+                                          (if (string? cell)
+                                              (string-trim cell)
+                                              cell))))
+
+  ; Clean things up using the helper function above
+  (define rows-of-cells (filter-not null? (map clean-cells-in-row rows-parsed)))
+
+  ; Create lists of individual cells using the tag functions defined previously.
+  ; These will be formatted according to the current target format.
+  ;   LaTeX: '((txt "Cell 1") " & " (txt "Cell 2") "\\\n")
+  ;   HTML:  '((td "Cell 1") (td "Cell 2"))
+  (define table-rows
+    (match-let ([(cons header-row other-rows) rows-of-cells])
+      (cons (map th-tag header-row)
+            (for/list ([row (in-list other-rows)])
+                      (map td-tag row)))))
+
+  (define col-args (if (not c-aligns) (make-string (length (first table-rows)) #\l) c-aligns))
+
+  (match-let ([(cons header-row other-rows) rows-of-cells])
+    `(txt "\\begin{table}[h!]\n"
+          "  \\centering\n"
+          "  \\begin{tabular}{" ,col-args "}\n"
+          "    \\toprule\n"
+          ,(apply tr-tag header-row)
+          "    \\midrule\n"
+          ,@(for/list ([row (in-list other-rows)]) (apply tr-tag row))
+          "    \\bottomrule\n"
+          "  \\end{tabular}\n"
+          "\\end{table}\n")))]
+	[else elems]))
 
 (provide for/s)
 (define-syntax (for/s stx)
