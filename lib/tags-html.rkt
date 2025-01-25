@@ -78,6 +78,7 @@
         ,@elems
         "□"))
 
+
 ; these are ok
 (define (html-h1 attrs title) `(h1 ,@title))
 (define (html-h2 attrs title) `(h2 ,@title))
@@ -91,10 +92,11 @@
   `(div [[class "equation"]] 
         "\\[" ,@elems "\\]"))
 
-; TODO
+
 (define (html-tex attrs pkgs elems)
   `(div [[class "math-display"]]
         "\\[" ,@elems "\\]"))
+
 
 (define (html-? attrs elems)
   `(div [[class "question"]]
@@ -153,6 +155,7 @@
 #| (define (html-link url attrs elems) `(a [[href ,url]] ,@elems)) |#
 #| (define (html-lank attrs elems) `(p ,@elems)) |#
 
+
 #|
 detect-newthoughts: called by root above when targeting HTML.
 The ◊newthought tag (defined further below) makes use of the \newthought
@@ -184,6 +187,7 @@ handle it at the Pollen processing level.
                       (a [[href ,authorlink]] ,author))
                 (span [[class "comment-time"]] ,comment-date))
              ,@contents)))
+
 
 #| otherjoel:
   ◊table : allows the creation of basic tables from a simplified notation.

@@ -96,6 +96,7 @@
 
 
 
+
 (define (pdf-p attrs elems) `(txt "" ,@elems "}\n\n"))
 (define (pdf-i attrs text) `(txt "{\\itshape " ,@(esc text) "}"))
 (define (pdf-em attrs elems) `(txt "\\emph{" ,@(esc elems) "}"))
@@ -112,6 +113,7 @@
 (define (pdf-h2 attrs elems #:id [id 0]) `(txt "\\subsection{" ,@elems "}"))
 (define (pdf-h3 attrs elems #:id [id 0]) `(txt "\\subsubsection{" ,@elems "}"))
 
+
 (define (pdf-$ attrs elems) (apply string-append `("$" ,@elems "$")))
 (define (pdf-eq attrs elems) `(txt-noescape "\\begin{equation}" ,@elems "\\end{equation}"))
 (define (pdf-tex attrs pkgs elems) `(txt-noescape "\\begin{equation}" ,@elems "\\end{equation}"))
@@ -122,6 +124,7 @@
 (define (pdf-Qt attrs elems) `(txt "\\begin{quote}" ,@elems "\\end{quote}"))
 (define (pdf-newthought attrs elems) `(txt "\\newthought{" ,@(esc elems) "}"))
 (define (pdf-epigraph attrs elems) `(txt "\\epigraph{" ,@(esc elems) "}{--- " ,(attr-val 'by attrs) "}"))
+
 
 (define (pdf-ol attrs elems) `(txt "\\begin{itemize}" ,@elems "\\end{itemize}"))
 (define (pdf-ul attrs elems) `(txt "\\begin{enumerate}[itemsep=2pt,parsep=2pt]" ,@elems "\\end{enumerate}"))
@@ -173,6 +176,7 @@
   (displayln file)
   (displayln filepath)
   #| (displayln (car filepath)) |#
+
   (if (attr-val 'flat attrs)
         `(txt "\\include{" ,(path->string
                                (path-replace-extension
@@ -184,7 +188,6 @@
 
 (define (pdf-link url attrs elems) `(zlink ,url ,@elems))
 (define (pdf-lank attrs elems) `(txt "[" ,@elems "]"))
-
 (define (pdf-comment attrs contents)
   (check-required-attributes 'comment '(author datetime authorlink) attrs)
   (let ([author (attr-val 'author attrs)]
@@ -192,6 +195,7 @@
        `(txt-comment "\\begin{quote}\n" ,@(esc contents)
                      "\n\\attrib{" ,(ltx-escape-str author) ", " ,comment-date "}"
                      "\n\\end{quote}\n\n")))
+
 
 (define (pdf-td-tag . tx-els) `(txt ,@(esc tx-els)))
 (define (pdf-th-tag . tx-els) `(txt ,@(esc tx-els)))

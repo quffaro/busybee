@@ -111,6 +111,7 @@
 (define (ltx-h2 attrs elems #:id [id 0]) `(txt "\\subsection{" ,@elems "}"))
 (define (ltx-h3 attrs elems #:id [id 0]) `(txt "\\subsubsection{" ,@elems "}"))
 
+
 (define (ltx-$ attrs elems) (apply string-append `("$" ,@elems "$")))
 (define (ltx-eq attrs elems) `(txt-noescape "\\begin{equation}" ,@elems "\\end{equation}"))
 (define (ltx-tex attrs pkgs elems) `(txt-noescape "\\begin{equation}" ,@elems "\\end{equation}"))
@@ -121,6 +122,7 @@
 (define (ltx-Qt attrs elems) `(txt "\\begin{quote}" ,@elems "\\end{quote}"))
 (define (ltx-newthought attrs elems) `(txt "\\newthought{" ,@(esc elems) "}"))
 (define (ltx-epigraph attrs elems) `(txt "\\epigraph{" ,@(esc elems) "}{--- " ,(attr-val 'by attrs) "}"))
+
 
 (define (ltx-ol attrs elems) `(txt "\\begin{itemize}" ,@elems "\\end{itemize}"))
 (define (ltx-ul attrs elems) `(txt "\\begin{enumerate}[itemsep=2pt,parsep=2pt]" ,@elems "\\end{enumerate}"))
@@ -191,6 +193,7 @@
        `(txt-comment "\\begin{quote}\n" ,@(esc contents)
                      "\n\\attrib{" ,(ltx-escape-str author) ", " ,comment-date "}"
                      "\n\\end{quote}\n\n")))
+
 
 (define (ltx-td-tag . tx-els) `(txt ,@(esc tx-els)))
 (define (ltx-th-tag . tx-els) `(txt ,@(esc tx-els)))

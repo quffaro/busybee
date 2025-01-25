@@ -161,6 +161,7 @@
     \fancyfoot[RE]{\ornpar   \\ \large  \sffamily\bf \textcolor{darkgray}{\thepage ~~~ \reflectbox{\leafNE}}\hfill}
 
 
+
     % see http://tex.stackexchange.com/questions/11263/how-can-i-remove-listing-from-listings-caption
     % and http://tex.stackexchange.com/questions/209764/how-can-i-make-the-width-of-the-caption-match-that-of-the-listing
     \usepackage{calc}
@@ -168,6 +169,7 @@
     \DeclareCaptionFont{white}{\scriptsize\color{white}\ttfamily}
     \DeclareCaptionFormat{listing}{%
 	\fcolorbox{black}{gray}{\parbox{\textwidth-2\fboxsep-2\fboxrule}{#1#2#3}}%
+
     }
     \captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white}
 
@@ -197,6 +199,7 @@
     % Make margin notes (from Tufte-LaTeX) into regular footnotes
     %\newcommand{\marginnote}[1]{\footnote{#1}}
     %\newcommand{\smallcaps}[1]{\textsc{#1}}
+
 
     \setlength{\parindent}{0pt}
     \setlength{\parskip}{6pt plus 2pt minus 1pt}
@@ -232,6 +235,7 @@
     \renewcommand\@makefntext[1]{\parindent 1em%
 	\noindent
 	\hb@xt@0em{\hss\normalfont\@thefnmark.} #1}
+
     \def\splitfootnoterule{\kern-3\p@ \hrule width 1in \kern2.6\p@}
     \makeatother
     \renewcommand\footnotesize{\fontsize{10}{12} \selectfont}
@@ -266,6 +270,7 @@
     \newcommand{\Conf}{\textsf{Conf}}
 
     \newcommand{\Kl}{\textsf{Kl}}
+
     \newcommand{\el}{\textsf{el}}
 
     \newcommand{\cM}{M}
@@ -281,10 +286,12 @@
     \usetikzlibrary{calc,intersections,through,backgrounds}
     \usepackage{tkz-euclide}
 
+
     \begin{document}
     \RaggedRight
 
     ◊(apply string-append (cdr doc))
+
 
     \end{document}})
 ◊(define working-directory

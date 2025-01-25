@@ -302,6 +302,48 @@
           "  \\end{tabular}\n"
           "\\end{table}\n")))]
 	[else elems]))
+=======
+(poly-branch-tag p)
+(poly-branch-tag b)
+(poly-branch-tag em)
+(poly-branch-tag i)
+(poly-branch-tag caps)
+(poly-branch-tag strike)
+
+(poly-branch-tag thm)
+(poly-branch-tag proof)
+
+(poly-branch-tag h1)
+(poly-branch-tag h2)
+(poly-branch-tag h3)
+
+(poly-branch-tag $)
+(poly-branch-tag eq)
+(poly-branch-tag tex)
+
+(poly-branch-tag ?)
+
+(poly-branch-tag qt)
+(poly-branch-tag Qt)
+(poly-branch-tag newthought)
+
+(poly-branch-tag ol)
+(poly-branch-tag ul)
+(poly-branch-tag li)
+
+(poly-branch-tag def)
+(poly-branch-tag code)
+(poly-branch-tag pre)
+
+(poly-branch-tag include)
+(poly-branch-tag link url)
+(poly-branch-tag lank)
+; TODO [[linking]]
+
+(poly-branch-tag td-tag)
+(poly-branch-tag th-tag)
+(poly-branch-tag tr-tag)
+(poly-branch-tag table (columns #f))
 
 (provide for/s)
 (define-syntax (for/s stx)
