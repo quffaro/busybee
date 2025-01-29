@@ -1,0 +1,3 @@
+#!/bin/bash
+
+fswatch -o $1 | xargs -n 1 raco pollen render -t pdf $2

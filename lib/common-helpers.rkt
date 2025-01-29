@@ -43,6 +43,28 @@
         ; Or if no comments exist, return the original txexpr
         txpr)))
 
+(define (wrap-glossary-section txpr escaper)
+  ; Helper - Returns true for any txexpr whose tag is 'txt-comment, 
+  ; or which is a 'div with class "comment-box".
+  (define (is-definition? tx)
+    (and (txexpr? tx)
+         (or (equal? 'def (get-tag tx))
+             (and (equal? 'div (get-tag tx))
+                  (attrs-have-key? tx 'class)
+                  (string=? "comment-box" (attr-ref tx 'class))))))
+  (define (definition-section . contents)
+    (case (current-poly-target)
+      [(pdf ltx) `(txt "\n\\subsection*{Glossary}\n" ,@(escaper contents))]
+      [else      `(section [[class "comments"]] (h2 "Responses") ,@contents)]))
+      
+  ; Split the comments out from the rest of the doc
+  (let-values ([(splut definitions) (splitf-txexpr txpr is-definition?)])
+    (if (not (null? definitions))
+        ; Reconstitute the doc with the freshly marked-up glossary section at the end
+        (txexpr 'body null (apply append (list (get-elements splut)
+                                               `(,(apply definition-section definitions)))))
+
+		txpr)))
 
 ; This function is for use in a contract, allowing me to spike the ball if
 ; a writer uses characters other than l, r, or c in the columns argument of my

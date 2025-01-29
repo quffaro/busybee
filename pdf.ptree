@@ -1,6 +1,13 @@
 #lang pollen
 ◊(require racket/string)
 
+◊(define (list-only-folders path)
+  (define folders
+    (filter (lambda (p) (equal? (file-or-directory-type p) 'directory))
+            (sequence->list (in-directory path))))
+  (map path->string folders))
+
+
 ◊(define (include-files folder extension)
    (map (λ(str)(string->symbol (format "~a/~a" folder (string-replace str extension "pdf"))))
         (filter (λ(str) (string-suffix? str extension))
@@ -9,6 +16,6 @@
 ◊(define (include-many-files folders)
 	(apply append (map (λ(x) (include-files x "poly.pm")) folders)))
 
-◊(define this-pagetree `(@ ,@(include-many-files '("posts/public" "posts/public/busybee"))))
+◊(define this-pagetree `(@ ,@(include-many-files '("posts/backburner" "posts/in-progress" "posts/zeta-functions" "posts/coc" "posts/circle-of-circles" "posts/circle-of-circles/cou"))))
 
 ◊this-pagetree

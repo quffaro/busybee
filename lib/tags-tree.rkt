@@ -32,6 +32,8 @@
 									   #:exclude-tags '(tex)))
   (txexpr 'body null second-pass))
 
+(define (tree-ignore attrs elem) `(txt ""))
+
 (define (tree-title attrs elems) (apply string-append `("\\title{" ,@elems "}")))
 (define (tree-taxon attrs elems) (apply string-append `("\\taxon{" ,@elems "}")))
 (define (tree-author attrs elems) (apply string-append `("\\author{" ,@elems "}")))
@@ -66,6 +68,7 @@
 (define (tree-qt attrs elems) `(txt "\"" ,@elems "\""))
 (define (tree-Qt attrs elems) `(txt "\\blockquote{" ,@elems "}"))
 (define (tree-newthought attrs elems) `(txt "\\p{" ,@elems "}\n\n"))
+(define (tree-epigraph attrs elems) `(txt "\\blockquote{" ,@elems "}"))
 
 (define (tree-ol attrs elems) `(txt "\\ol{" ,@elems "}"))
 (define (tree-ul attrs elems) `(txt "\\ul{" ,@elems "}"))
@@ -80,6 +83,8 @@
 (define (tree-link url attrs tx-elem) 
   `(txt "[" ,@tx-elem "]" ,(if (non-empty-string? url) (string-append "(" url ")") "")))
 (define (tree-lank attrs tx-elem) `(txt "[[" ,@tx-elem "]]"))
+
+(define (tree-comment attrs contents) `(txt ,@contents))
 
 #| (define (tree-table . elems) (apply string-append `("\\table{" ,@elems "}"))) |#
 (define (tree-td-tag . tx-els) `(txt "\\td{" ,@(esc tx-els) "}"))
